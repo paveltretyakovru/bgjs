@@ -8,15 +8,15 @@
 var Board = function(){}
 
 /* configs values */
-Board.prototype.width       = 642;
+Board.prototype.width       = 600;
 Board.prototype.height      = 600;
-Board.prototype.image       = '../images/tables/light_wood_board.jpg';
+Board.prototype.image       = '../images/tables/2dboard.png';
 Board.prototype.htmlid      = 'container';
 Board.prototype.imagex      = 0;
 Board.prototype.imagey      = 0;
 Board.prototype.pieceheight = 30;
-Board.prototype.topy        = 32;
-Board.prototype.bottomy     = 535;
+Board.prototype.topy        = 30;
+Board.prototype.bottomy     = 540;
 
 /* empty values */
 Board.prototype.stage       = {};
@@ -122,30 +122,30 @@ Board.prototype.init    = function(){
 Board.prototype.fields = [
     0 	,	// Заглушка для нулевого элемента массива
 	// BOTTOM FIELDS
-	{x : 35  , pieces : [] }	,	// 1
-	{x : 80  , pieces : [] } 	,	// 2
-	{x : 124 , pieces : [] } 	,	// 3
-	{x : 166 , pieces : [] } 	,	// 4
-	{x : 210 , pieces : [] } 	,	// 5
-	{x : 254 , pieces : [] } 	,	// 6
-	{x : 356 , pieces : [] } 	,	// 7
-	{x : 400 , pieces : [] } 	,	// 8
-	{x : 444 , pieces : [] } 	,	// 9
-	{x : 488 , pieces : [] } 	,	// 10
-	{x : 532 , pieces : [] } 	,	// 11
-	{x : 576 , pieces : [] } 	,	// 12
+	{x : 26  , pieces : [] }	,	// 1
+	{x : 71  , pieces : [] } 	,	// 2
+	{x : 114 , pieces : [] } 	,	// 3
+	{x : 157 , pieces : [] } 	,	// 4
+	{x : 200 , pieces : [] } 	,	// 5
+	{x : 243 , pieces : [] } 	,	// 6
+	{x : 325 , pieces : [] } 	,	// 7
+	{x : 368 , pieces : [] } 	,	// 8
+	{x : 413 , pieces : [] } 	,	// 9
+	{x : 456 , pieces : [] } 	,	// 10
+	{x : 499 , pieces : [] } 	,	// 11
+	{x : 542 , pieces : [] } 	,	// 12
 
 	// TOP FIELDS
-	{x : 576 , pieces : [] }	,	// 13
-	{x : 532 , pieces : [] } 	,	// 14
-	{x : 488 , pieces : [] } 	,	// 15
-	{x : 446 , pieces : [] } 	,	// 16
-	{x : 403 , pieces : [] } 	,	// 17
-	{x : 358 , pieces : [] } 	,	// 18
-	{x : 254 , pieces : [] } 	,	// 19
-	{x : 210 , pieces : [] } 	,	// 20
-	{x : 166 , pieces : [] } 	,	// 21
-	{x : 124 , pieces : [] } 	,	// 22
-	{x : 80  , pieces : [] } 	,	// 23
-	{x : 36  , pieces : [] } 		// 24
+	{x : 544 , pieces : [] }	,	// 13
+	{x : 500 , pieces : [] } 	,	// 14
+	{x : 457 , pieces : [] } 	,	// 15
+	{x : 414 , pieces : [] } 	,	// 16
+	{x : 370 , pieces : [] } 	,	// 17
+	{x : 326 , pieces : [] } 	,	// 18
+	{x : 244 , pieces : [] } 	,	// 19
+	{x : 201 , pieces : [] } 	,	// 20
+	{x : 158 , pieces : [] } 	,	// 21
+	{x : 115 , pieces : [] } 	,	// 22
+	{x : 71  , pieces : [] } 	,	// 23
+	{x : 27  , pieces : [] } 		// 24
 ];

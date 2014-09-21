@@ -1,59 +1,18 @@
 #container{
     margin     : auto;
+    position: absolute;
 }
 
 /* DIES STYLES */
-#roll-wrap {
-perspective: 800;
-perspective-origin: 50% 200px;
+.dice {
+    float: left;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 300px;
+    box-shadow: 0 0 10px rgba(125,90,57,0.5);
+    background: #fff url('../images/dice.png')
+    /* border: 1px solid #7d5a39; */
 }
-#play{
-color: #333;
-background: #fff;
-line-height: 40px;
-padding: 10px 33px;
-border-radius: 5px;
-font-weight: bolder;
-}
-#play:hover{
-  cursor: pointer;
-}
-#dice {
-  position: relative;
-  margin: 10px auto 0;
-  height: 400px;
-  width: 400px;
-  transition: transform 2s linear;
-  transform-style: preserve-3d;
-}
-.sf {
-  position: absolute;
-  height: 62px;
-  width: 62px;
-  padding: 20px;
-  background-color: rgba(50, 50, 50, 0.7);
-  font-size: 37px;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 3px;
-  text-align: center;
-  line-height: 62px;
-}
-#dice .f1  {
-  transform: rotateX(90deg) translateZ(50px);
-}
-#dice .f2 {
-  transform: translateZ(50px);
-}
-#dice .f3 {
-  transform: rotateY(90deg) translateZ(50px);
-}
-#dice .f4 {
-  transform: rotateY(180deg) translateZ(50px);
-}
-#dice .f5 {
-  transform: rotateY(-90deg) translateZ(50px);
-}
-#dice .f6 {
-  transform: rotateX(-90deg) rotate(180deg) translateZ(50px);
-}
+    .d1{left: 120px;}
+    .d2{left: 180px;}

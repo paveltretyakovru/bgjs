@@ -1,16 +1,3 @@
-//Prefix free support code for jquery
-(function($, self){
-    if(!$ || !self) {
-        return;
-    }
-    for(var i=0; i<self.properties.length; i++) {
-        var property = self.properties[i],
-        camelCased = StyleFix.camelCase(property),
-        PrefixCamelCased = self.prefixProperty(property, true);
-        $.cssProps[camelCased] = PrefixCamelCased;
-    }
-})(window.jQuery, window.PrefixFree);
-
 /*
     # Договоренность с самим собой по переменным
     var int fieldnum    - номер поля
@@ -24,17 +11,27 @@ $(document).ready(function(){
     window.board    = new Board();
     window.rules    = new Rules();
     window.pieces   = new Array();
-    window.bones    = new Bones();
+    window.bones    = new Bones('.dice');
     
+    $('#shakeButton').click(function(e){
+        e.preventDefault();
+        window.bones.shake();
+    });
+   
     // инициализируем игровую доску
     window.board.init();
     
-    // создаем фишки
-    for(var i = 0; i < 30; i++){
-        var pieceid = i;
+    // создаем фишки+\
+    switch(window.game.type){
         
-        switch(window.game.type){
-            case 'long':
+        /*  
+            ########     ########       ########    ########
+            ####   Тип создания фишек для длинных нард  ####
+            ########    ########        ########    ########
+        */
+        case 'long':
+            for(var i = 0; i < 30; i++){
+                var pieceid = i;
                 if (i < 15){
                     // создаем объекты фишек
                     window.pieces[i] = new Piece( 'white' , pieceid , window.board.mainlayer , window.board.stage , 'left') ;
@@ -43,15 +40,14 @@ $(document).ready(function(){
                     window.pieces[i] = new Piece( 'black' , pieceid , window.board.mainlayer , window.board.stage , 'right') ;
                     startPiecesPositions(window.pieces[i].obj , 13);
                 }
-                break;
-            default : console.error("Передан неизвестный тип игры");
-        }
-        
-        window.pieces[i].obj.on('dragend' , function(){
-            console.log(this.id() , ' dragend');
-        });
+                
+                window.pieces[i].obj.on('dragend' , function(){
+                    console.log(this.id() , ' dragend');
+                });
+            }
+            break;
+        default : console.error("Передан неизвестный тип игры");
     }
-    
     
     /*
         #
