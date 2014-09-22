@@ -12,6 +12,16 @@ $(document).ready(function(){
     window.rules    = new Rules();
     window.pieces   = new Array();
     window.bones    = new Bones('.dice');
+    window.socket   = new Socket();
+    
+    
+    /*
+        # Работа с сервером
+        #
+        #
+    */
+    var registrData = {id : randomNumber(1 , 1000)};
+    window.socket.registrOnServer(registrData); // регистрируемся на сервере
     
     $('#shakeButton').click(function(e){
         e.preventDefault();
@@ -50,6 +60,12 @@ $(document).ready(function(){
     }
     
     /*
+    for(var i = 0; i < 30; i++){
+        
+    }
+    */
+    
+    /*
         #
         # procedure startPiecesPositions(obj pieceobj , num fieldnum)
         # функция для стартового перемещения фишек
@@ -65,5 +81,11 @@ $(document).ready(function(){
         // добавляем фишку на поле
         window.board.addPiece(pieceobj.id() , fieldnum);
 
+    }
+    
+    function randomNumber(min, max){
+    	var rand = min - 0.5 + Math.random()*(max-min+1)
+    	rand = Math.round(rand);
+    	return rand;
     }
 });
