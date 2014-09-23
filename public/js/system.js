@@ -13,8 +13,9 @@ $(document).ready(function(){
     window.socket   = new Socket();
     window.game     = new Game(window.board , window.rules , window.bones , window.socket); // УПРАВЛЯЮЩИЙ ОБЪЕКТ СИСТЕМЫ
     
-    game.bones.changeSide(0 , 'left');
-    game.bones.changeSide(1 , 'right');
+    
+    window.game.bones.changeSide(0 , 'left');
+    window.game.bones.changeSide(1 , 'right');
     
     /*      ### Работа с сервером ###       */
     
