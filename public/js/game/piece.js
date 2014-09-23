@@ -9,6 +9,7 @@ var Piece = function(color , id , layer , stage , type){
         this.id     = id;
     }else{
         controll    = false;
+        console.log('Один из параметров создания фишки равен undefined: ' , color , id , type);
     }
     
     switch (color) {

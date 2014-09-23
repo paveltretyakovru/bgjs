@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-var debug   = require('debug')('workspace');
-var app     = require('../app');
+var debug       = require('debug')('workspace');
+var app         = require('../app');
 
-var requser = require('user');
+var requser     = require('user');
+var replayers   = require('players');
+var regame      = require('game');
 
 //var userobj = new user();
 
@@ -13,47 +15,82 @@ var server = app.listen(app.get('port'), function() {
 });
 
 /*
-    # Работает с подключенными игроками
-    #
-    #
+    #                                   #
+    # Работает с подключенными игроками #
+    #                                   #
 */
 
-var players = [ /* ### obj User ### */ ];
+/* создаем объект работающий со списком пользователей */
+var players = new replayers();
 
 var io = require('socket.io')(server);
 
 io.on('connection' , function(socket){
-    var user = new requser();
+    var user    = new requser();
+    var game    = new regame();
+    
+    // сохраняем сокет
     user.setSocket(socket);
     
     socket.on('registr' , function(data){
+        debug('registr : ' , data);
+        
+        // Регистрируем пользователя на сервере
         user.registr(data);
         
-        if(user.id !== undefined){
-            players.push(user);
+        // Добавляем пользователя в общий список игроков
+        players.addPlayer(user);
+        
+        // Смотрим сколько у нас игроков
+        players.showList();
+        
+        // Ищем свободного игрока
+        user.enemy = players.findFreePlayer(user.id);
+        
+        // Проверяем найден ли свободный игрок
+        if('key' in user.enemy || 'id' in user.enemy){
+            // Блокируем доступ к нему
+            if(players.lockPlayer(user.enemy)){
+                // Блокируем подключившегося игрока
+                user.lock = true;
+                debug("Players blocked: " , user.enemy , {id : user.id});
+                /*
+                    ###     ###     ###     ###     ###     ###     ###     ###     ###   ###
+                    ### Сделал открытие, заблокировав игрока напрямую (user.lock = true), ###
+                    ### Он так же заблокировался и глобальном массиве игроков arr players ###
+                    ###     ###     ###     ###     ###     ###     ###     ###     ###   ###
+                */
                 
-            console.log('Players online: ');
-            for(var i = 0; i < players.length; i++){
-                debug('id: ' + players[i].id);
+                // Создаем переменную с объектом аппонента
+                var enemy = players.list[user.enemy.key];
+                
+                // Генерируем идентификаторы фишек
+                game.generatePieces();
+                
+                // отрпавляем игрокам идентификаторы фишек
+                user.socket.emit    ( 'takePieces'  , { pieces : game.pieces } );
+                enemy.socket.emit   ( 'takePieces'  , { pieces : game.pieces } );
+                
+                // отрпавляем идентификаторы соперника игрокам
+                user.socket.emit    ( 'takeEnemy'   , { id : enemy.id } );
+                enemy.socket.emit   ( 'takeEnemy'   , { id : user.id } );
+                
+                
+                
+            }else{
+                debug("ERROR Can't blocked player %d " , user.enemy);
             }
-        }
+        }else{debug("Don't find enemy for player");}
     });
     
+    /*
+        # Отключение пользователя 
+        #
+        #
+    */
     socket.on('disconnect' , function(){
-        deleteUser(user.id , players);
+        // Удаляем игрока из общего списка
+        players.deletePlayer(user.id);
+        players.showList();
     });
 });
-
-function deleteUser(id , players){
-    var i           = 0;
-    var controll    = true;
-    
-    while(controll){
-        if(players[i].id === id){
-            players.splice(i , 1);
-            controll = false;
-        }
-        i++;
-        if(i === players.length) controll = false;
-    }
-}
