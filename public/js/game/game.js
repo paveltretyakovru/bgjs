@@ -151,9 +151,12 @@ Game.prototype.takeGameData = function(data){
                 // Анимируем жеребьевку
                 this.animateLot(data.lots);
                 
+                console.log('Получены данные начала игры с сервера: ' , data);
+                // сохраняем победителя
+                self.enemy.winner = data.winner;
+                
+                //Инициализация фишек
                 var animateLot = setTimeout(function() {
-                    console.log('Инициализация фишек');
-                    self.enemy.winner = data.winner;
                     self.initPieces(data.pieces);
                 }, 3000);
                 
@@ -174,20 +177,25 @@ Game.prototype.animateLot = function(lots){
     var self = this;
     
     this.setMessage('Игрок подключен. Идет жеребьевка');
-    
-    console.log('Взбалтываем первую фишку');
+
     // меням сторону расположения кости
     this.bones.changeSide(0 , 'left');
     // взбалтываем и перемешиваем
     this.bones.shake(0 , 1000 , lots[0]);
-    
+
     // спустя секунды шейкеруем 2 кость
     var shakeBone2 = setTimeout(function() {
-        console.log('Взбалтываем втуроую фишку');
         // перемещаем 2 кость вправо
         self.bones.changeSide(1 , 'right');
         // взбалтываем и перемещиваем
         self.bones.shake(1 , 1000 , lots[1]);
+        // Отображаем чей ход
+        console.info(self.enemy.winner);
+        if(self.enemy.winner === true){
+            self.setMessage('Жеребьевка окончена. Ход противника');
+        }else{
+            self.setMessage('Жеребьевка окончена. Ваш ход');
+        }
     }, 1000);
     //clearTimeout(shakeBone2);
 }

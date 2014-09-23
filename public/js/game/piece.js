@@ -38,7 +38,7 @@ var Piece = function(color , id , layer , stage , type){
             height  : this.height ,
             image   : pimage ,
             
-            draggable : true
+            //draggable : true
         });
         
         this.obj = pimageobj;

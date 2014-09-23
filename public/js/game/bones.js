@@ -10,7 +10,6 @@ Bones.prototype.selector    = {};
 Bones.prototype.number      = 1;
 
 Bones.prototype.changeSide = function(bone , side){
-    console.log('change position bone');
     
     var board = $(this.board);
     
@@ -47,8 +46,6 @@ Bones.prototype.selectGlyph = function (number){
 };
 
 Bones.prototype.shake = function(bone , timeAnim , boneval){
-    console.log('shake :-)');
-    
     var obj = this;
     
     obj.selector = $(this.elements[bone]);
