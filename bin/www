@@ -54,6 +54,7 @@ io.on('connection' , function(socket){
                 // Блокируем подключившегося игрока
                 user.lock = true;
                 debug("Players blocked: " , user.enemy , {id : user.id});
+                
                 /*
                     ###     ###     ###     ###     ###     ###     ###     ###     ###   ###
                     ### Сделал открытие, заблокировав игрока напрямую (user.lock = true), ###
@@ -64,18 +65,21 @@ io.on('connection' , function(socket){
                 // Создаем переменную с объектом аппонента
                 var enemy = players.list[user.enemy.key];
                 
+                // Сохраняем идентификаторы пользователей
+                game.players[0] = user.id;
+                game.players[1] = enemy.id;
+                
+                // Определяем победителя
+                game.winnerSpot();
+                var wu = (game.winner === user.id)  ? true : false; // флаг (победитель ли подключившийся)
+                var we = (game.winner === enemy.id) ? true : false; // флаг (победитель ли найденный соперник)
+                
                 // Генерируем идентификаторы фишек
                 game.generatePieces();
                 
-                // отрпавляем игрокам идентификаторы фишек
-                user.socket.emit    ( 'takePieces'  , { pieces : game.pieces } );
-                enemy.socket.emit   ( 'takePieces'  , { pieces : game.pieces } );
-                
-                // отрпавляем идентификаторы соперника игрокам
-                user.socket.emit    ( 'takeEnemy'   , { id : enemy.id } );
-                enemy.socket.emit   ( 'takeEnemy'   , { id : user.id } );
-                
-                
+                // Отправляем данные созданной игры
+                user.socket.emit('takeGameData' , {id : enemy.id , winner : we , pieces : game.pieces , lots : game.lots});
+                enemy.socket.emit('takeGameData' , {id : user.id , winner : wu , pieces : game.pieces , lots : game.lots});
                 
             }else{
                 debug("ERROR Can't blocked player %d " , user.enemy);

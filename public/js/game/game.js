@@ -16,14 +16,23 @@ Game.prototype.bones    = {};
 Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
-Game.prototype.type     = 'long';
-Game.prototype.pieces   = [ /* */];
+Game.prototype.meselement   = '#gamemessage';
+Game.prototype.type         = 'long';   // тип игры
+Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
+Game.prototype.pieces       = [ /* */];
+// timers
+Game.prototype.timelot      = 5000;
 
-Game.prototype.enemy    = {
+Game.prototype.enemy        = {
     /*
-        # id : идентификатор соперника
+        # int   id      : идентификатор соперника
+        # bool  winner  : победитель ли
     */
 };
+
+Game.prototype.setMessage = function(message){
+    $(this.meselement).html(message);
+}
 
 /*
     # Инициализация фишек
@@ -43,10 +52,32 @@ Game.prototype.initPieces = function(pieces){
                 if (i < 15){
                     // создаем объекты фишек
                     this.pieces[i] = new Piece( 'white' , pieceid , this.board.mainlayer , this.board.stage , 'left') ;
-                    this.startPiecesPositions(this.pieces[i].obj , 1);
+                    
+                    // если фишки должны всегда находиться в одном положении
+                    if(this.onepos){
+                        // если соперник выиграл
+                        if(this.enemy.winner){
+                            // распологаем белые слева
+                            this.startPiecesPositions(this.pieces[i].obj , 13);
+                        }else{
+                            // располагаем черные справа
+                            this.startPiecesPositions(this.pieces[i].obj , 1);
+                        }
+                    }
                 }else{
                     this.pieces[i] = new Piece( 'black' , pieceid , this.board.mainlayer , this.board.stage , 'right') ;
-                    this.startPiecesPositions(this.pieces[i].obj , 13);
+                    
+                    // если фишки должны всегда находиться в одном положении
+                    if(this.onepos){
+                        // если соперник выиграл
+                        if(this.enemy.winner){
+                            // распологаем черные справа
+                            this.startPiecesPositions(this.pieces[i].obj , 1);
+                        }else{
+                            // распологаяем черные слева
+                            this.startPiecesPositions(this.pieces[i].obj , 13);
+                        }
+                    }
                 }
             }
             break;
@@ -101,33 +132,62 @@ Game.prototype.setListener = function(name , obj , fun){
 */
 Game.prototype.registrOnServer = function(data){
     this.socket.connection.emit('registr' , data );
+    this.setMessage("Ожидание подключения соперника");
+};
+
+
+/* 
+    # Получаем стартовые данные об игре
+    #
+    #
+*/
+Game.prototype.takeGameData = function(data){
+    var self = this;
+    
+    if(typeof(data) === 'object'){
+        if('id' in data && 'pieces' in data && 'winner' in data && 'lots' in data){
+            if(data.id !== undefined && data.pieces !== undefined && data.winner !== undefined && data.lots !== undefined){
+                
+                // Анимируем жеребьевку
+                this.animateLot(data.lots);
+                
+                var animateLot = setTimeout(function() {
+                    console.log('Инициализация фишек');
+                    self.enemy.winner = data.winner;
+                    self.initPieces(data.pieces);
+                }, 3000);
+                
+                //clearTimeout(animateLot);
+                
+            }else{console.error("Один из параметров игры не определен" , data )}
+        }else{console.error("Один из параметров игры отсутсвует. " , data );}
+    }else{console.error("Данные игры переданы не объектом" , data );}
 };
 
 
 /*
-    # Получаем данные о сопернике
-    #
+    # Функция анимаирует жеребьевку
+    # lots - значение костей -> array(lot1 , lot2)
     #
 */
-Game.prototype.takeEnemy = function(data){
+Game.prototype.animateLot = function(lots){
+    var self = this;
     
-}
-
-/*
-    # Получаем идентификаторы фишек с сервера
-    # переданный параметр data обязательно должен иметь свойство piece
-    #
-*/
-Game.prototype.takePieces = function(data){
-    if(typeof(data) === 'object'){
-        if('pieces' in data){
-            if(typeof(data.pieces) === 'object'){
-                this.initPieces(data.pieces);
-            }
-        }else{
-            console.error("В переданном объекте отсутствует свойство 'pieces'");
-        }
-    }else{
-        console.error("Переданный параметр data в функцию takePieces, не является объектом");
-    }
+    this.setMessage('Игрок подключен. Идет жеребьевка');
+    
+    console.log('Взбалтываем первую фишку');
+    // меням сторону расположения кости
+    this.bones.changeSide(0 , 'left');
+    // взбалтываем и перемешиваем
+    this.bones.shake(0 , 1000 , lots[0]);
+    
+    // спустя секунды шейкеруем 2 кость
+    var shakeBone2 = setTimeout(function() {
+        console.log('Взбалтываем втуроую фишку');
+        // перемещаем 2 кость вправо
+        self.bones.changeSide(1 , 'right');
+        // взбалтываем и перемещиваем
+        self.bones.shake(1 , 1000 , lots[1]);
+    }, 1000);
+    //clearTimeout(shakeBone2);
 }

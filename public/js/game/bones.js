@@ -2,12 +2,33 @@ var Bones = function(selector){
     this.selector = $(selector);
 };
 
-Bones.prototype.bone1       = 0;
-Bones.prototype.bone2       = 0;
-Bones.prototype.size       = 40;
+Bones.prototype.elements    = ['.d1' , '.d2'];
+Bones.prototype.board       = '#container';
+Bones.prototype.vals        = [0 , 0];
+Bones.prototype.size        = 40;
 Bones.prototype.selector    = {};
-Bones.prototype.timeAnim    = 1000;
 Bones.prototype.number      = 1;
+
+Bones.prototype.changeSide = function(bone , side){
+    var board = $(this.board);
+    
+    var startx = board.offset().left;  // позиция доски по х
+    var starty = board.offset().top;   // позиция доски по у
+    var bwidth = board.width();        // ширина доски
+    var bheight= board.height();       // высота доски
+    
+    var part = bwidth / 4;
+    
+    if(side === 'left'){
+        $(this.elements[bone]).offset({top : starty+bheight/2 , left : startx+part});
+    }
+    
+    if(side === 'right'){
+        $(this.elements[bone]).offset({top : starty+bheight/2 , left : startx+part * 3});
+    }
+    
+    
+};
 
 Bones.prototype.selectGlyph = function (number){
     var x, y;
@@ -23,30 +44,33 @@ Bones.prototype.selectGlyph = function (number){
     this.selector.css('backgroundPosition', x+'px '+y+'px');
 };
 
-Bones.prototype.shake = function(){
+Bones.prototype.shake = function(bone , timeAnim , boneval){
     console.log('shake :-)');
     
     var obj = this;
+    
+    obj.selector = $(this.elements[bone]);
     
     $.when($.Deferred(function(dfd){
         var z = obj.selector.css('z-index');
 
         obj.selector.css('z-index', 1).animate(
-            { 'z-index': obj.timeAnim } ,
+            { 'z-index': 1000 } ,
             {
                 step    : function(now, fx){
                     obj.selectGlyph(Math.floor(Math.random() * 6) + 1);
                 } ,
                 
-                duration: obj.timeAnim ,
+                duration: timeAnim ,
                 
                 complete: dfd.resolve
             }).css('z-index', z);
 
         return dfd.promise();
     })).done(function() {
-        
-        obj.number = (Math.floor(Math.random() * 6) + 1);
+        // Math.floor(Math.random() * 6) + 1
+        // по-моему здесь нужно менять номер
+        obj.number = (boneval);
         
         $(this).stop();
         

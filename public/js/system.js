@@ -13,17 +13,16 @@ $(document).ready(function(){
     window.socket   = new Socket();
     window.game     = new Game(window.board , window.rules , window.bones , window.socket); // УПРАВЛЯЮЩИЙ ОБЪЕКТ СИСТЕМЫ
     
+    game.bones.changeSide(0 , 'left');
+    game.bones.changeSide(1 , 'right');
     
     /*      ### Работа с сервером ###       */
     
     // регистрируемся на сервере
     window.game.registrOnServer({id : randomNumber(1 , 1000)});
     
-    // получаем фишки игры
-    window.game.setListener('takePieces' , 'Game' , 'takePieces');
-    
-    // получаем информация о сопернике
-    window.game.setListener('takeEnemy' , 'Game' , 'takeEnemy');
+    // получаем стартовые данные игры
+    window.game.setListener('takeGameData' , 'Game' , 'takeGameData');
    
     // инициализируем игровую доску
     window.board.init();

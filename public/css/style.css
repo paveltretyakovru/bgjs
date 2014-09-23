@@ -3,16 +3,19 @@
     position: absolute;
 }
 
+#gamemessage{
+    color : red;
+}
+
 /* DIES STYLES */
 .dice {
     float: left;
     width: 40px;
     height: 40px;
     position: absolute;
-    top: 300px;
     box-shadow: 0 0 10px rgba(125,90,57,0.5);
     background: #fff url('../images/dice.png')
     /* border: 1px solid #7d5a39; */
 }
-    .d1{left: 120px;}
-    .d2{left: 180px;}
+    .d1{}
+    .d2{}
