@@ -135,11 +135,11 @@ Game.prototype.setListener = function(name , obj , fun){
             }else{ console.error("Обращение к несуществующему объекту " , obj); }
         }
     });
-}
+};
 
 Game.prototype.sendRequest = function(name , data){
     this.socket.connection.emit(name , data);
-}
+};
 
 /*
     # Регестрируемся на сервере
@@ -184,7 +184,7 @@ Game.prototype.activatePieces = function(){
     this.rules.setSteps(this.step.steps);
     
     // перебираем поля
-    for(var field = 1; field <= this.board.fields.length; field++){
+    for(var field = 1; field < this.board.fields.length; field++){
         // если поле содержит фишки
         if(this.board.fields[field].pieces.length !== 0){
             if(this.rules.canMove(field , 0)){
