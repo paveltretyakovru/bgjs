@@ -28,6 +28,7 @@ var io = require('socket.io')(server);
 io.on('connection' , function(socket){
     var user    = new requser();
     var game    = new regame();
+    var enemy   = {};
     
     // сохраняем сокет
     user.setSocket(socket);
@@ -61,31 +62,49 @@ io.on('connection' , function(socket){
                     ### Он так же заблокировался и глобальном массиве игроков arr players ###
                     ###     ###     ###     ###     ###     ###     ###     ###     ###   ###
                 */
-                
                 // Создаем переменную с объектом аппонента
-                var enemy = players.list[user.enemy.key];
+                enemy = players.list[user.enemy.key];
                 
                 // Сохраняем идентификаторы пользователей
                 game.players[0] = user.id;
                 game.players[1] = enemy.id;
                 
-                // Определяем победителя
-                game.winnerSpot();
-                var wu = (game.winner === user.id)  ? true : false; // флаг (победитель ли подключившийся)
-                var we = (game.winner === enemy.id) ? true : false; // флаг (победитель ли найденный соперник)
-                
                 // Генерируем идентификаторы фишек
                 game.generatePieces();
                 
+                // Генерируем значение лотовых костей
+                var lotbones = game.generateLotBones();
+                // Генерируем зачение шаговых костей
+                game.generateBones();
+                
                 // Отправляем данные созданной игры
-                user.socket.emit('takeGameData' , {id : enemy.id , winner : we , pieces : game.pieces , lots : game.lots});
-                enemy.socket.emit('takeGameData' , {id : user.id , winner : wu , pieces : game.pieces , lots : game.lots});
+                user.socket.emit('takeGameData' , {
+                    id          : enemy.id , 
+                    pieces      : game.pieces , 
+                    bones       : game.bones , 
+                    lotbones    : [ lotbones[0] , lotbones[1] ]
+                });
+                
+                enemy.socket.emit('takeGameData' , {
+                    id          : user.id ,
+                    pieces      : game.pieces ,
+                    bones       : game.bones ,
+                    lotbones    : [ lotbones[1] , lotbones[0] ]
+                });
                 
             }else{
                 debug("ERROR Can't blocked player %d " , user.enemy);
             }
         }else{debug("Don't find enemy for player");}
     });
+    
+    /* ### Получен запрос сгенерировать новые кости ### */
+    socket.on('setBones' , function(data){
+        // генерируем кости
+        game.generateBones();
+        // рассылаем значение костей
+        sendRequestEvery('setBones' , game.bones);
+    }); 
     
     /*
         # Отключение пользователя 
@@ -97,4 +116,11 @@ io.on('connection' , function(socket){
         players.deletePlayer(user.id);
         players.showList();
     });
+    
+    function sendRequestEvery(name , data){
+        if(name !== undefined && name !== ''){
+            user.socket.emit(name , data);
+            enemy.socket.emit(name , data);
+        }
+    }
 });

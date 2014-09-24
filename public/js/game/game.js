@@ -12,7 +12,6 @@ var Game = function(board , rules , bones , socket){
 */
 Game.prototype.board    = {};
 Game.prototype.rules    = {};
-Game.prototype.bones    = {};
 Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
@@ -21,13 +20,17 @@ Game.prototype.type         = 'long';   // тип игры
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 // timers
-Game.prototype.timelot      = 5000;
+Game.prototype.timelot      = 3000;
 
 Game.prototype.enemy        = {
     /*
         # int   id      : идентификатор соперника
-        # bool  winner  : победитель ли
     */
+};
+
+Game.prototype.step         = {
+    player  : '' , // self || enemy 
+    bones   : []
 };
 
 Game.prototype.setMessage = function(message){
@@ -56,11 +59,13 @@ Game.prototype.initPieces = function(pieces){
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
                         // если соперник выиграл
-                        if(this.enemy.winner){
+                        if(this.step.player === 'enemy'){
                             // распологаем белые слева
+                            this.enemy.part = 'left';
                             this.startPiecesPositions(this.pieces[i].obj , 13);
                         }else{
                             // располагаем черные справа
+                            this.enemy.part = 'right';
                             this.startPiecesPositions(this.pieces[i].obj , 1);
                         }
                     }
@@ -70,7 +75,7 @@ Game.prototype.initPieces = function(pieces){
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
                         // если соперник выиграл
-                        if(this.enemy.winner){
+                        if(this.step.player === 'enemy'){
                             // распологаем черные справа
                             this.startPiecesPositions(this.pieces[i].obj , 1);
                         }else{
@@ -125,6 +130,10 @@ Game.prototype.setListener = function(name , obj , fun){
     });
 }
 
+Game.prototype.sendRequest = function(name , data){
+    this.socket.connection.emit(name , data);
+}
+
 /*
     # Регестрируемся на сервере
     # 
@@ -138,35 +147,78 @@ Game.prototype.registrOnServer = function(data){
 
 /* 
     # Получаем стартовые данные об игре
-    #
+    # и инициализируем игру
     #
 */
 Game.prototype.takeGameData = function(data){
     var self = this;
     
     if(typeof(data) === 'object'){
-        if('id' in data && 'pieces' in data && 'winner' in data && 'lots' in data){
-            if(data.id !== undefined && data.pieces !== undefined && data.winner !== undefined && data.lots !== undefined){
+        if('id' in data && 'pieces' in data && 'bones' in data && 'lotbones' in data){
+            if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
+                console.log('Получены данные начала игры с сервера: ' , data);
+                // Сохраняем значение костей для хода
+                this.step.bones = data.bones;
                 
                 // Анимируем жеребьевку
-                this.animateLot(data.lots);
+                this.animateLot(data.lotbones);
                 
-                console.log('Получены данные начала игры с сервера: ' , data);
-                // сохраняем победителя
-                self.enemy.winner = data.winner;
+                // Определяем чей ход
+                if(data.lotbones[0] > data.lotbones[1]){
+                    this.step.player = 'self';
+                }else{
+                    this.step.player = 'enemy';
+                }
                 
-                //Инициализация фишек
-                var animateLot = setTimeout(function() {
+                /*
+                    # Инициализация фишек
+                    # Она происходит после анимации жеребьевки
+                    #
+                */
+                setTimeout(function() {
                     self.initPieces(data.pieces);
-                }, 3000);
-                
-                //clearTimeout(animateLot);
+                    self.moveBonesToNeed();
+                    
+                    // После передвижения фишек, снова взбалтываем их
+                    // для определения очков хода
+                    setTimeout(function(){
+                        // время тряски
+                        var shaketime   = self.timelot / 6;
+                        // взбалтываем первую кость
+                        self.bones.shake(0 , shaketime , self.step.bones[0]);
+                        
+                        setTimeout(function(){
+                            // взбалтываем вторую кость
+                            self.bones.shake(1 , shaketime , self.step.bones[1]);
+                            
+                        } , shaketime);
+                    // время ожидания равно длительности анимации
+                    } , self.bones.moveanimtime);
+                }, this.timelot);
                 
             }else{console.error("Один из параметров игры не определен" , data )}
         }else{console.error("Один из параметров игры отсутсвует. " , data );}
     }else{console.error("Данные игры переданы не объектом" , data );}
 };
 
+Game.prototype.moveBonesToNeed = function(){
+    // если фишки должны всегда находиться в одном положении
+    if(this.onepos){
+        if(this.step.player === 'enemy'){
+            if(this.enemy.part === 'left'){
+                this.bones.moveToSide(2 , 'left');
+            }else{
+                this.bones.moveToSide(2 , 'right');
+            }
+        }else{
+            if(this.enemy.part === 'left'){
+                this.bones.moveToSide(2 , 'right');
+            }else{
+                this.bones.moveToSide(2 , 'left');
+            }
+        }
+    }
+};
 
 /*
     # Функция анимаирует жеребьевку
@@ -174,28 +226,27 @@ Game.prototype.takeGameData = function(data){
     #
 */
 Game.prototype.animateLot = function(lots){
-    var self = this;
+    var self        = this;
+    var shaketime   = this.timelot / 6;
     
     this.setMessage('Игрок подключен. Идет жеребьевка');
 
     // меням сторону расположения кости
     this.bones.changeSide(0 , 'left');
     // взбалтываем и перемешиваем
-    this.bones.shake(0 , 1000 , lots[0]);
+    this.bones.shake(0 , shaketime , lots[0]);
 
     // спустя секунды шейкеруем 2 кость
-    var shakeBone2 = setTimeout(function() {
+    setTimeout(function() {
         // перемещаем 2 кость вправо
         self.bones.changeSide(1 , 'right');
         // взбалтываем и перемещиваем
-        self.bones.shake(1 , 1000 , lots[1]);
+        self.bones.shake(1 , shaketime , lots[1]);
         // Отображаем чей ход
-        console.info(self.enemy.winner);
-        if(self.enemy.winner === true){
+        if(self.step.player === 'enemy'){
             self.setMessage('Жеребьевка окончена. Ход противника');
         }else{
             self.setMessage('Жеребьевка окончена. Ваш ход');
         }
-    }, 1000);
-    //clearTimeout(shakeBone2);
-}
+    }, shaketime);
+};

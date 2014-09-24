@@ -2,84 +2,79 @@ var Bones = function(selector){
     this.selector = $(selector);
 };
 
-Bones.prototype.elements    = ['.d1' , '.d2'];
+Bones.prototype.elements    = ['#die1' , '#die2'];
 Bones.prototype.board       = '#container';
 Bones.prototype.vals        = [0 , 0];
 Bones.prototype.size        = 40;
 Bones.prototype.selector    = {};
-Bones.prototype.number      = 1;
+Bones.prototype.moveanimtime=1000; // время перемещения фишек
 
-Bones.prototype.changeSide = function(bone , side){
-    
-    var board = $(this.board);
-    
-    var startx = board.offset().left;  // позиция доски по х
-    var starty = board.offset().top;   // позиция доски по у
-    var bwidth = board.width();        // ширина доски
-    var bheight= board.height();       // высота доски
-    
-    var part = bwidth / 4;
-    
-    if(side === 'left'){
-        $(this.elements[bone]).offset({top : starty+bheight/2 , left : startx+part});
-    }
-    
-    if(side === 'right'){
-        $(this.elements[bone]).offset({top : starty+bheight/2 , left : startx+part * 3});
-    }
-    
-    
+/*
+    # Функция возвращает параметры доски
+*/
+Bones.prototype.getBoardParams = function(){
+   var board = $(this.board);
+   
+    var startx      = board.offset().left       ;   // позиция доски по х
+    var starty      = board.offset().top        ;   // позиция доски по у
+    var width       = board.width()             ;   // ширина доски
+    var height      = board.height()            ;   // высота доски
+    var part        = width / 4                 ;   // четверть ширины доски
+    var half        = starty + height / 2 - 20  ;   // половина высоты доски
+    var leftpart    = startx + part             ;   // центр левой половины
+    var rightpart   = startx + part * 3         ;  // центр правой половины
+   
+   return {
+        startx      : startx    ,   // позиция доски по х
+        starty      : starty    ,   // позиция доски по у
+        width       : width     ,   // ширина доски
+        height      : height    ,   // высота доски
+        part        : part      ,   // четверть ширины доски
+        half        : half      ,   // половина высоты доски
+        leftpart    : leftpart  ,   // центр левой половины
+        rightpart   : rightpart     // центр правой половины
+   } 
 };
 
-Bones.prototype.selectGlyph = function (number){
-    var x, y;
-    switch (number){
-      default:
-      case 1: x = 0;            y =  0;          break;
-      case 2: x = 2*this.size;  y =  0;          break;
-      case 3: x = this.size;    y =  0;          break;
-      case 4: x = this.size;    y = this.size;   break;
-      case 5: x = 2*this.size;  y = this.size;   break;
-      case 6: x = 0;            y = this.size;   break;
+/*
+    # Функция телепортирует кость bone (= 0 | 1)
+    # в указанную часть side (= left | right)
+    #
+*/
+Bones.prototype.changeSide = function(bone , side){
+    var board = this.getBoardParams();
+    if(side === 'left'){$(this.elements[bone]).offset({top : board.half , left : board.leftpart});}
+    if(side === 'right'){$(this.elements[bone]).offset({top : board.half , left : board.rightpart});}
+};
+
+/*
+    # Функция анимированно перемещает указнные фишки в 
+    # нужную часть
+    #
+*/
+Bones.prototype.moveToSide = function(bone , side){
+    var board = this.getBoardParams();
+    
+    switch(bone){
+        // Перемещаем 2 фишки
+        case 2:
+            // перемещение в лево
+            if(side === 'left'){
+                $(this.elements[0]).animate({left:board.leftpart - 30} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.leftpart + 30} , this.moveanimtime);
+            // перемещение вправо
+            }else if(side === 'right'){
+                $(this.elements[0]).animate({left:board.rightpart - 30} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.rightpart + 30} , this.moveanimtime);
+            }else{console.error('Неверное значение для перемещения фишек');}
+        break;
     }
-    this.selector.css('backgroundPosition', x+'px '+y+'px');
 };
 
 Bones.prototype.shake = function(bone , timeAnim , boneval){
-    var obj = this;
+    var selector = $(this.elements[bone]);
+    selector.css('visibility' , 'visible');
     
-    obj.selector = $(this.elements[bone]);
-    obj.selector.css('visibility' , 'visible');
-    
-    $.when($.Deferred(function(dfd){
-        var z = obj.selector.css('z-index');
-
-        obj.selector.css('z-index', 1).animate(
-            { 'z-index': 1000 } ,
-            {
-                step    : function(now, fx){
-                    obj.selectGlyph(Math.floor(Math.random() * 6) + 1);
-                } ,
-                
-                duration: timeAnim ,
-                
-                complete: dfd.resolve
-            }).css('z-index', z);
-
-        return dfd.promise();
-    })).done(function() {
-        // Math.floor(Math.random() * 6) + 1
-        // по-моему здесь нужно менять номер
-        obj.number = (boneval);
-        
-        $(this).stop();
-        
-        obj.selectGlyph(obj.number);
-
-        /*
-            if (options.callback
-                && typeof(options.callback) === "function")
-            options.callback(options.number);
-        */
-    });
+    selector.addClass("active").attr('data-value' , boneval);
+    selector.effect('shake' , timeAnim);
 };
