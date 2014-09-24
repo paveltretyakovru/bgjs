@@ -1,8 +1,8 @@
-var Game = function(board , rules , bones , socket){
-    this.board  = board;
-    this.rules  = rules;
-    this.bones  = bones;
-    this.socket = socket;
+var Game = function(objboard , objrules , objbones , objsocket){
+    this.board  = objboard;
+    this.rules  = objrules;
+    this.bones  = objbones;
+    this.socket = objsocket;
 };
 
 /* 
@@ -19,23 +19,28 @@ Game.prototype.meselement   = '#gamemessage';
 Game.prototype.type         = 'long';   // тип игры
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
+Game.prototype.side         = '';       // left || right
 // timers
 Game.prototype.timelot      = 3000;
 
-Game.prototype.enemy        = {
-    /*
-        # int   id      : идентификатор соперника
-    */
-};
+Game.prototype.enemy        = {};
 
 Game.prototype.step         = {
-    player  : '' , // self || enemy 
-    bones   : []
+    player  : '' ,      // self || enemy 
+    bones   : [] ,
+    side    : 'left' ,  // left || right
+    steps   : {}
 };
 
+
+/*
+    # Выводит сообщение пользователю
+    #
+    #
+*/
 Game.prototype.setMessage = function(message){
     $(this.meselement).html(message);
-}
+};
 
 /*
     # Инициализация фишек
@@ -55,17 +60,19 @@ Game.prototype.initPieces = function(pieces){
                 if (i < 15){
                     // создаем объекты фишек
                     this.pieces[i] = new Piece( 'white' , pieceid , this.board.mainlayer , this.board.stage , 'left') ;
-                    
+
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
                         // если соперник выиграл
                         if(this.step.player === 'enemy'){
                             // распологаем белые слева
-                            this.enemy.part = 'left';
+                            this.enemy.side = 'left';
+                            this.side       = 'right';
                             this.startPiecesPositions(this.pieces[i].obj , 13);
                         }else{
                             // располагаем черные справа
-                            this.enemy.part = 'right';
+                            this.enemy.side = 'right';
+                            this.side       = 'left';
                             this.startPiecesPositions(this.pieces[i].obj , 1);
                         }
                     }
@@ -144,6 +151,73 @@ Game.prototype.registrOnServer = function(data){
     this.setMessage("Ожидание подключения соперника");
 };
 
+/*
+    # Главная функция шага
+    # Активирует необходимые фишки
+    #
+*/
+Game.prototype.letsRock = function(){
+    // Чей сейчас ход (self  || enemy)
+    var player = this.step.player;
+    
+    // Выводим сообщение
+    if(player === 'enemy'){this.setMessage('Ход противника');}else{this.setMessage('Ваш ход');}
+    
+    // Считаем количество ходов
+    this.calcPoints();
+    
+    // Теперь необходимо активировать возможные фишки
+    this.activatePieces();
+    
+};
+
+/*
+    # Перебирает поля и активирует возможно ходящие фишки
+    #
+    #
+*/
+Game.prototype.activatePieces = function(){
+    
+    // отправляем в прававой объект поля доски
+    this.rules.setFields(this.board.fields);
+    // отправляем объект шагов правовому объетку
+    this.rules.setSteps(this.step.steps);
+    
+    // перебираем поля
+    for(var field = 1; field <= this.board.fields.length; field++){
+        // если поле содержит фишки
+        if(this.board.fields[field].pieces.length !== 0){
+            if(this.rules.canMove(field , 0)){
+                
+            }
+        }
+    }
+};
+
+Game.prototype.calcPoints = function(){
+    var bone1 = this.step.bones[0];
+    var bone2 = this.step.bones[1];
+    
+    // колчество возможных шагов
+    var steps = (bone1 === bone2) ? 4 : 2;
+    
+    var st = [];
+    
+    if(steps === 2){
+        st[0] = [bone1 , 0];
+        st[1] = [bone2 , 0];
+    }
+    
+    if(steps === 4){
+        st[0] = [bone1 , 0];
+        st[1] = [bone1 , 0];
+        st[2] = [bone1 , 0];
+        st[3] = [bone1 , 0];
+    }
+    
+    this.step.steps = st;
+};
+
 
 /* 
     # Получаем стартовые данные об игре
@@ -191,6 +265,9 @@ Game.prototype.takeGameData = function(data){
                             // взбалтываем вторую кость
                             self.bones.shake(1 , shaketime , self.step.bones[1]);
                             
+                            // НАКОНЕЦ НАЧИНАЕМ ИГРУ!!!
+                            self.letsRock();
+                            
                         } , shaketime);
                     // время ожидания равно длительности анимации
                     } , self.bones.moveanimtime);
@@ -205,13 +282,13 @@ Game.prototype.moveBonesToNeed = function(){
     // если фишки должны всегда находиться в одном положении
     if(this.onepos){
         if(this.step.player === 'enemy'){
-            if(this.enemy.part === 'left'){
+            if(this.enemy.side === 'left'){
                 this.bones.moveToSide(2 , 'left');
             }else{
                 this.bones.moveToSide(2 , 'right');
             }
         }else{
-            if(this.enemy.part === 'left'){
+            if(this.enemy.side === 'left'){
                 this.bones.moveToSide(2 , 'right');
             }else{
                 this.bones.moveToSide(2 , 'left');

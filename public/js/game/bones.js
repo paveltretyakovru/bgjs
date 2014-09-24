@@ -60,12 +60,12 @@ Bones.prototype.moveToSide = function(bone , side){
         case 2:
             // перемещение в лево
             if(side === 'left'){
-                $(this.elements[0]).animate({left:board.leftpart - 30} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.leftpart + 30} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
             // перемещение вправо
             }else if(side === 'right'){
-                $(this.elements[0]).animate({left:board.rightpart - 30} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.rightpart + 30} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
             }else{console.error('Неверное значение для перемещения фишек');}
         break;
     }

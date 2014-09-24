@@ -12,8 +12,7 @@ $(document).ready(function(){
     window.bones    = new Bones('.dice');
     window.socket   = new Socket();
     window.game     = new Game(window.board , window.rules , window.bones , window.socket); // УПРАВЛЯЮЩИЙ ОБЪЕКТ СИСТЕМЫ
-    
-    
+
     window.game.bones.changeSide(0 , 'left');
     window.game.bones.changeSide(1 , 'right');
     
@@ -34,3 +33,17 @@ $(document).ready(function(){
     	return rand;
     }
 });
+
+
+/*
+
+# функция создает наследование объектов без выполнения конструктора предка
+
+function inherit(object , parent){
+    function F(){}
+    F.prototype = parent.prototype;
+    object.prototype = new F();
+    return object;
+}
+
+*/

@@ -53,9 +53,9 @@ Board.prototype.calcLastFieldPos = function(fieldnum){
             y = this.topy + lastnum * this.pieceheight;
         }
         
-        return { x : fx , y : y }
+        return { x : fx , y : y };
     }
-}
+};
 
 /*
     #
@@ -76,7 +76,7 @@ Board.prototype.checkCorrectFieldNum = function(fieldnum){
         console.error('Не определен параметр fieldnum, либо неправильного типа: ' , fieldnum , typeof(fieldnum));
         return false;
     }
-}
+};
 
 /*
     #
@@ -117,7 +117,7 @@ Board.prototype.init    = function(){
     
     this.stage.add(this.mainlayer);
     this.stage.batchDraw();
-}
+};
 
 Board.prototype.fields = [
     0 	,	// Заглушка для нулевого элемента массива
