@@ -42,8 +42,6 @@ Rules.prototype.handleRules = function(oldfield , newfield){
 Rules.prototype.calcMove = function(oldfield , newfield){
     var result = oldfield;
     
-    console.log('calcMove function');
-    
     if(this.steps.length === 2){
         var can1 = false;
         var can2 = false;
@@ -51,11 +49,8 @@ Rules.prototype.calcMove = function(oldfield , newfield){
         
         if(this.steps[0][1] === 0){
             
-            console.log('step1');
-            
             result = this.handleRules(oldfield , this.steps[0][0] + oldfield);
             if(result){
-                console.log('step1 result!!!');
                 can1 = this.steps[0][0] + oldfield;
             }
         }
@@ -135,14 +130,10 @@ Rules.prototype.calcMove = function(oldfield , newfield){
             // считаем сколько нужно шаговых очков для данного хода
             var countneedpoints = differ / points;
             
-            console.log('countneedpoints' , countneedpoints);
-            
             // если колество очков достаточно
             if(countneedpoints <= free){
                 // забиваем игровые шаги
                 for(var i = 0; i < countneedpoints; i++){
-                    
-                    console.log('Свободный шаг счеттчик' , i);
                     
                     // ищем свободный шаг
                     for(var n = 0; n < 4; n++){
@@ -157,8 +148,6 @@ Rules.prototype.calcMove = function(oldfield , newfield){
                 
                 // проверяем на правила данный ход
                 if(this.handleRules(oldfield , newfield)){
-                    console.log('THIS FIELD');
-                    
                     // возвращаем значение нового поля
                     return newfield;
                 }
@@ -175,7 +164,9 @@ Rules.prototype.calcMove = function(oldfield , newfield){
         function findFree(free , steps){
             var countsteps = 0;
             
-            for(var i = 0; i < free; i++){
+            for(var i = 0; i < steps.length; i++){
+                console.log(countsteps++ , steps[i][1]);
+                
                 if(steps[i][1] === 0){
                     return i;
                 }
@@ -194,7 +185,7 @@ Rules.prototype.calcMove = function(oldfield , newfield){
                 for(var i = 0; i < freecounter; i++){
                     var elemfree = findFree(free , this.steps);
                     
-                    if(elemfree){
+                    if(elemfree !== false){
                         // забиваем ее значение номером новго поля
                         this.steps[elemfree][1] = oldfield + points * freecounter;
                     }else{
@@ -209,8 +200,6 @@ Rules.prototype.calcMove = function(oldfield , newfield){
             }
             
             if(freecounter === free){controll = false;}
-            
-            console.log(freecounter);
             
             freecounter++;
         }

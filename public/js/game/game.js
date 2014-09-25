@@ -202,13 +202,15 @@ Game.prototype.activatePieces = function(){
                     // получаем последнюю фишку
                     var lastpiece = this.getLastPiece(field);
                     
+                    console.log('lastpiece' , lastpiece);
+                    
                     // запускаем разрешение передвигать фишку
                     this.setDraggable(lastpiece , field);
                 }else{
                     console.log('CANT MOVE! :-(');
                 }
-            }
-        }       // if pieces.length !== 0
+            }else{console.log('Это не поле игрока' , field);}
+        }else{console.log('Длина поля равна нулю' , field);}       // if pieces.length !== 0
     }           // for fields
 };
 
@@ -380,15 +382,15 @@ Game.prototype.calcPoints = function(){
     var st = [];
     
     if(steps === 2){
-        st[0] = [bone1 , 0];
-        st[1] = [bone2 , 0];
+        st[0] = [bone1 , 0 , 0];
+        st[1] = [bone2 , 0 , 0];
     }
     
     if(steps === 4){
-        st[0] = [bone1 , 0];
-        st[1] = [bone1 , 0];
-        st[2] = [bone1 , 0];
-        st[3] = [bone1 , 0];
+        st[0] = [bone1 , 0 , 0];
+        st[1] = [bone1 , 0 , 0];
+        st[2] = [bone1 , 0 , 0];
+        st[3] = [bone1 , 0 , 0];
     }
     
     this.step.steps = st;
@@ -408,8 +410,8 @@ Game.prototype.takeGameData = function(data){
             if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                //this.step.bones = data.bones;
-                this.step.bones = [2 , 2];
+                this.step.bones = data.bones;
+                //this.step.bones = [2 , 2];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
