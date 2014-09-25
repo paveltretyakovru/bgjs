@@ -7,6 +7,7 @@ var Piece = function(color , id , layer , stage , type){
         this.stage  = stage;
         this.type   = type;
         this.id     = id;
+        this.color  = color;
     }else{
         controll    = false;
         console.log('Один из параметров создания фишки равен undefined: ' , color , id , type);
@@ -29,6 +30,7 @@ var Piece = function(color , id , layer , stage , type){
         var pimage = new Image();
         pimage.src = imagesrc;
         
+        
         // создаем Kineticjs изображение
         var pimageobj = new Kinetic.Image({
             x       : 0 ,
@@ -50,6 +52,19 @@ var Piece = function(color , id , layer , stage , type){
     }
 };
 
+Piece.prototype.moveTo = function( x , y){
+    var self = this;
+    
+    var tween = new Kinetic.Tween({
+		node : self.obj ,
+		duration : 0.5 ,
+		x : x ,
+		y : y
+	});
+
+	tween.play();
+};
+
 Piece.prototype.x       = 0;
 Piece.prototype.y       = 0;
 Piece.prototype.field   = 0;
@@ -58,6 +73,7 @@ Piece.prototype.height  = 30;
 
 Piece.prototype.id      = '';
 Piece.prototype.type    = '';
+Piece.prototype.color   = '';
 
 Piece.prototype.layer   = {};
 Piece.prototype.stage   = {};

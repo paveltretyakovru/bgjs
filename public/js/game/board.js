@@ -21,6 +21,7 @@ Board.prototype.bottomy     = 540;
 /* empty values */
 Board.prototype.stage       = {};
 Board.prototype.mainlayer   = {};
+Board.prototype.piececolor  = '';   // black || white
 
 /* functions values */
 
@@ -83,7 +84,40 @@ Board.prototype.checkCorrectFieldNum = function(fieldnum){
     # Вычисляет номер поля по координатам
     #
 */
-Board.prototype.calcField = function(){};
+Board.prototype.calcField = function(x , y){
+    var fields 		= this.fields;
+	var width 		= this.pieceheight / 2 + 15;
+	var top_height 	= this.height / 2;
+	var num 		= 1;
+	
+	for(var i = 1; i < fields.length; i++){
+		if(x <= fields[i].x + width && x >= fields[i].x - width){
+			if(y <= top_height && i >= 13){
+				num = i;
+			}else if(y > top_height && i <= 12){
+				num = i;
+			}
+		}
+	}
+	
+	if(x > fields[12].x){
+		if(y >= top_height){
+			num = 12;
+		}else{
+			num = 13;
+		}
+	}
+	
+	if(x < fields[1].x){
+		if(y >= top_height){
+			num = 1;
+		}else{
+			num = 24;
+		}
+	}
+	
+	return num;
+};
 
 /*
     #
@@ -91,6 +125,8 @@ Board.prototype.calcField = function(){};
     #
 */
 Board.prototype.init    = function(){
+    var self = this;
+    
     // создаем главнй объект игрового поля
     this.stage = new Kinetic.Stage({
             container   : this.htmlid ,
@@ -100,23 +136,26 @@ Board.prototype.init    = function(){
     
     // инициализируем изображение
     var bimage = new Image();
-    bimage.src = this.image;
     
     // создаем Kineticjs изображение
-    var bimageobj = new Kinetic.Image({
-        x       : this.imagex ,
-        y       : this.imagey ,
-        width   : this.width ,
-        height  : this.height ,
-        image   : bimage
-    });
+    bimage.onload = function(){
+        var bimageobj = new Kinetic.Image({
+            x       : self.imagex ,
+            y       : self.imagey ,
+            width   : self.width ,
+            height  : self.height ,
+            image   : bimage
+        });
+        
+         // создаем основной слой
+        self.mainlayer = new Kinetic.Layer();
+        self.mainlayer.add(bimageobj);
+        
+        self.stage.add(self.mainlayer);
+        self.stage.batchDraw();
+    }
     
-    // создаем основной слой
-    this.mainlayer = new Kinetic.Layer();
-    this.mainlayer.add(bimageobj);
-    
-    this.stage.add(this.mainlayer);
-    this.stage.batchDraw();
+    bimage.src = this.image;
 };
 
 Board.prototype.fields = [

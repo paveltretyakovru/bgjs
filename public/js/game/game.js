@@ -20,6 +20,7 @@ Game.prototype.type         = 'long';   // тип игры
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
+Game.prototype.piececolor   = '';       // white || black
 // timers
 Game.prototype.timelot      = 3000;
 
@@ -29,7 +30,8 @@ Game.prototype.step         = {
     player  : '' ,      // self || enemy 
     bones   : [] ,
     side    : 'left' ,  // left || right
-    steps   : {}
+    steps   : {} ,
+    points  : 0
 };
 
 
@@ -68,12 +70,13 @@ Game.prototype.initPieces = function(pieces){
                             // распологаем белые слева
                             this.enemy.side = 'left';
                             this.side       = 'right';
-                            this.startPiecesPositions(this.pieces[i].obj , 13);
+                            
+                            this.startPiecesPositions(this.pieces[i].obj , 13 , this.pieces[i]);
                         }else{
                             // располагаем черные справа
                             this.enemy.side = 'right';
                             this.side       = 'left';
-                            this.startPiecesPositions(this.pieces[i].obj , 1);
+                            this.startPiecesPositions(this.pieces[i].obj , 1 , this.pieces[i]);
                         }
                     }
                 }else{
@@ -84,10 +87,10 @@ Game.prototype.initPieces = function(pieces){
                         // если соперник выиграл
                         if(this.step.player === 'enemy'){
                             // распологаем черные справа
-                            this.startPiecesPositions(this.pieces[i].obj , 1);
+                            this.startPiecesPositions(this.pieces[i].obj , 1 , this.pieces[i]);
                         }else{
                             // распологаяем черные слева
-                            this.startPiecesPositions(this.pieces[i].obj , 13);
+                            this.startPiecesPositions(this.pieces[i].obj , 13 , this.pieces[i]);
                         }
                     }
                 }
@@ -105,8 +108,12 @@ Game.prototype.initPieces = function(pieces){
     #
 */
 
-Game.prototype.startPiecesPositions = function(pieceobj , fieldnum){
+Game.prototype.startPiecesPositions = function(pieceobj , fieldnum , piece){
     var position = this.board.calcLastFieldPos(fieldnum);
+    
+    piece.x = position.x;
+    piece.y = position.y;    
+    
     // перемещаем фишку
      pieceobj.x(position.x);
      pieceobj.y(position.y);
@@ -163,12 +170,13 @@ Game.prototype.letsRock = function(){
     // Выводим сообщение
     if(player === 'enemy'){this.setMessage('Ход противника');}else{this.setMessage('Ваш ход');}
     
-    // Считаем количество ходов
-    this.calcPoints();
-    
-    // Теперь необходимо активировать возможные фишки
-    this.activatePieces();
-    
+    if(player === 'self'){
+        // Считаем количество ходов
+        this.calcPoints();
+        
+        // Теперь необходимо активировать возможные фишки
+        this.activatePieces();
+    }
 };
 
 /*
@@ -177,7 +185,6 @@ Game.prototype.letsRock = function(){
     #
 */
 Game.prototype.activatePieces = function(){
-    
     // отправляем в прававой объект поля доски
     this.rules.setFields(this.board.fields);
     // отправляем объект шагов правовому объетку
@@ -187,16 +194,185 @@ Game.prototype.activatePieces = function(){
     for(var field = 1; field < this.board.fields.length; field++){
         // если поле содержит фишки
         if(this.board.fields[field].pieces.length !== 0){
-            if(this.rules.canMove(field , 0)){
-                
+            // является ли поле игрока
+            if(this.myField(field)){
+                var canmove = this.rules.canMove(field);
+                // если поле может ходить
+                if(canmove){
+                    // получаем последнюю фишку
+                    var lastpiece = this.getLastPiece(field);
+                    
+                    // запускаем разрешение передвигать фишку
+                    this.setDraggable(lastpiece , field);
+                }else{
+                    console.log('CANT MOVE! :-(');
+                }
             }
-        }
+        }       // if pieces.length !== 0
+    }           // for fields
+};
+
+Game.prototype.setDraggable = function(piece , oldfield){
+    console.log("Активировали фишку :-)");
+    
+    var self        = this;
+    var pieceobj    = this.getPiece(piece.id());
+    
+    piece.draggable(true);
+    
+    piece.on('dragend' , function(){
+        var node = this;
+        var x = node.x();
+        var y = node.y();
+        
+        // вычисляем поле на котором остановилась фишка
+        var newfield    = self.board.calcField(x , y);
+        
+        // вычисляем поле, на которое может сходить фишка
+        var movefield   = self.rules.calcMove(oldfield , newfield);
+        
+        console.log('movefield' , movefield);
+        
+        // вычисляем координаты поля на которое можно сходить
+        var pos         = self.board.calcLastFieldPos(movefield);
+        
+        // перемещаем идентификатор фишки
+        self.moveIdPiece(movefield , node.id());
+        
+        // перемещаем фишку
+        pieceobj.moveTo(pos.x , pos.y);
+        
+        // после завершения хода блокируем фишки, для новых расчетов
+        self.blockedPieces();
+        
+        // очищаем обработчик перемещения для новых расчетов
+        this.off('dragend');
+        
+        self.activatePieces();
+    });
+    
+};
+
+Game.prototype.blockedPieces = function(){
+    for(var i = 0; i < this.pieces.length; i++){
+        this.pieces[i].obj.draggable(false);
+    }
+};
+
+
+/*
+    # Перемещает в полях идентификаторы
+    #
+    #
+*/
+Game.prototype.moveIdPiece = function(newfield , id){
+    var lastpos = this.calcPiecePos(id);
+    
+    console.log(newfield , id , lastpos);
+    
+    this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+    this.board.fields[newfield].pieces.push(id);
+};
+
+/*
+    # ищет фишку в полях
+    #
+    #
+*/
+Game.prototype.calcPiecePos = function(id){
+    var piece = false;
+    for(var i = 1; i <= this.board.fields.length; i++){
+		if(this.board.fields[i] !== undefined){
+			for(var n = 0; n < this.board.fields[i].pieces.length; n++){
+				if(this.board.fields[i].pieces[n] !== undefined){
+					if(id == this.board.fields[i].pieces[n]){
+						piece = [i , n];
+					}
+    			}
+			}
+		}
+	}
+	return piece;
+}
+
+/*
+    # fun getLastPiece
+    # возвращает последнюю фишку в поле
+    #
+*/
+Game.prototype.getLastPiece = function(field){
+    var lastkey = this.board.fields[field].pieces.length-1;
+    var lastid  = this.board.fields[field].pieces[lastkey];
+    
+    var pieceobj = this.getPieceObj(lastid);
+    if(!pieceobj){console.error('При получении последей фиши произошла ошибка')}
+    
+    return pieceobj;
+};
+
+Game.prototype.getPieceObj = function(id){
+    var object = false;
+    for(var i = 0; i < this.pieces.length; i++){
+       if(this.pieces[i].id === id){
+           object = this.pieces[i].obj;
+       }
+    }
+    
+    return object;
+};
+
+Game.prototype.getPiece = function(id){
+    var object = false;
+    for(var i = 0; i < this.pieces.length; i++){
+       if(this.pieces[i].id === id){
+           object = this.pieces[i];
+       }
+    }
+    
+    return object;
+}
+
+/*
+    # Функция определяет свое ли поле
+    #
+    #
+*/
+Game.prototype.myField = function(field){
+    // есть ли на поле вообще фишки
+    if(this.board.fields[field].pieces.length !== 0){
+        // берем идентификатор первой фишки в поле
+       var pieceid  = this.board.fields[field].pieces[0];
+       var piecenum = 0;
+       // ищем фишку в объекте фишек
+       for(var i = 0; i < this.pieces.length; i++){
+           if(this.pieces[i].id === pieceid){
+               piecenum = i;
+           }
+       }
+       
+       // если тип фишки совпадает с типом игрока
+       if(this.pieces[piecenum].color === this.piececolor){
+           // значит поле игрока
+           return true;
+       }else{
+           return false;
+       }
+    // если поле свободное
+    }else{
+        return false;
     }
 };
 
 Game.prototype.calcPoints = function(){
-    var bone1 = this.step.bones[0];
-    var bone2 = this.step.bones[1];
+    var bone1 , bone2;
+    
+    if(this.step.bones[0] < this.step.bones[1]){
+        bone1 = this.step.bones[0];
+        bone2 = this.step.bones[1];
+    }else{
+        bone1 = this.step.bones[1];
+        bone2 = this.step.bones[0];
+    }
     
     // колчество возможных шагов
     var steps = (bone1 === bone2) ? 4 : 2;
@@ -232,16 +408,21 @@ Game.prototype.takeGameData = function(data){
             if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                this.step.bones = data.bones;
+                //this.step.bones = data.bones;
+                this.step.bones = [2 , 2];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
                 
                 // Определяем чей ход
                 if(data.lotbones[0] > data.lotbones[1]){
-                    this.step.player = 'self';
+                    this.step.player        = 'self';
+                    this.piececolor         = 'white';
+                    this.board.piececolor   = 'white';
                 }else{
-                    this.step.player = 'enemy';
+                    this.step.player        = 'enemy';
+                    this.piececolor         = 'black';
+                    this.board.piececolor   = 'black';
                 }
                 
                 /*
