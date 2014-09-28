@@ -242,7 +242,7 @@ Game.prototype.setDraggable = function(piece , oldfield){
         var newfield    = self.board.calcField(x , y);
         
         // вычисляем поле, на которое может сходить фишка
-        var movefield   = self.rules.calcMove(oldfield , newfield);
+        var movefield   = self.rules.calcMove(oldfield , newfield , node.id());
         
         console.log('movefield' , movefield);
         
@@ -403,16 +403,18 @@ Game.prototype.calcPoints = function(){
     
     var st = [];
     
+    // st[ячейка очка] = [номер кости , поля занятое ячейкой , старое поле, id фишки]
+    
     if(steps === 2){
-        st[0] = [bone1 , 0 , 0];
-        st[1] = [bone2 , 0 , 0];
+        st[0] = [bone1 , 0 , 0 , 0];
+        st[1] = [bone2 , 0 , 0 , 0];
     }
     
     if(steps === 4){
-        st[0] = [bone1 , 0 , 0];
-        st[1] = [bone1 , 0 , 0];
-        st[2] = [bone1 , 0 , 0];
-        st[3] = [bone1 , 0 , 0];
+        st[0] = [bone1 , 0 , 0 , 0];
+        st[1] = [bone1 , 0 , 0 , 0];
+        st[2] = [bone1 , 0 , 0 , 0];
+        st[3] = [bone1 , 0 , 0 , 0];
     }
     
     this.step.steps = st;

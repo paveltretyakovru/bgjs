@@ -39,8 +39,11 @@ Board.prototype.addPiece = function(pieceid , fieldnum){
     #
 */
 Board.prototype.calcLastFieldPos = function(fieldnum){
+    console.log('calcLastFieldPos controll. fieldnum: ' + fieldnum);
+    
     if(this.checkCorrectFieldNum(fieldnum)){
         // номер последней позиции в поле
+        
         var lastnum = this.fields[fieldnum].pieces.length;
             
         // field x
@@ -123,6 +126,8 @@ Board.prototype.calcField = function(x , y){
 	        num = 18;
 	    }
 	}
+	
+	console.log('calcfield controll. fieldnum: ' , num);
 	
 	return num;
 };

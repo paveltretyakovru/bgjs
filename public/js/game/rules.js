@@ -39,8 +39,35 @@ Rules.prototype.handleRules = function(oldfield , newfield){
     return ruleresult;
 };
 
-Rules.prototype.calcMove = function(oldfield , newfield){
+Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
     var result = oldfield;
+    
+    /*
+        # Если игрок передвигает фишку назад
+        # то наверно он хочет вернуть фишку назад
+        # 
+    */
+    
+    if(newfield < oldfield){
+        for(var i = 0; i < this.steps.length; i++){
+            // ищем в истории поле с которого передвинута фишка
+            if(this.steps[i][1] === oldfield){
+                // проверяем ходит ли той же фишкой
+                if(this.steps[i][3] === pieceid){
+                    result = this.steps[i][2];
+                    
+                    // стираем значение текущей ичейки очка
+                    this.steps[i][1] = 0;
+                    this.steps[i][2] = 0;
+                    this.steps[i][3] = 0;
+                    
+                    // если найдено в истории, возвращаем значение предыдущего хода
+                    // этой фишки
+                    return result;
+                }
+            }
+        }
+    }
     
     if(this.steps.length === 2){
         var can1 = false;
@@ -75,30 +102,52 @@ Rules.prototype.calcMove = function(oldfield , newfield){
         // если новое поле является возможным то перетаскиваем на него
         if(can1 === newfield){ 
             this.steps[0][1] = newfield;
+            this.steps[0][2] = oldfield;    // сохраняем предыдущиее поле
+            this.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
             return can1;
         }
         if(can2 === newfield){
             this.steps[1][1] = newfield;
+            this.steps[1][2] = oldfield;    // сохраняем предыдущее поле
+            this.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
             return can2;
         }
         if(can3 === newfield) {
             this.steps[0][1] = newfield;
             this.steps[1][1] = newfield;
+            
+            // сохраняем предыдущее поле
+            this.steps[0][2] = oldfield; 
+            this.steps[1][2] = oldfield;
+            
+            // сохраняем идентификатор фихи
+            this.steps[0][3] = pieceid;
+            this.steps[1][3] = pieceid;
             return can3;
         }
         
         // иначе ходим минамально возможным либо суммой
         if(can1) {
             this.steps[0][1] = can1;
+            this.steps[0][2] = oldfield; // сохраняем предыдущиее поле
+            this.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
             return can1
         };
         if(can2) {
             this.steps[1][1] = can2;
+            this.steps[1][2] = oldfield; // сохраняем предыдущиее поле
+            this.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
             return can2;
         };
         if(can3) {
             this.steps[0][1] = can3;
             this.steps[1][1] = can3;
+            
+            this.steps[0][2] = oldfield; // сохраняем предыдущиее поле
+            this.steps[1][2] = oldfield;
+            
+            this.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
+            this.steps[1][3] = pieceid;
             return can3
         };
     }
@@ -140,7 +189,10 @@ Rules.prototype.calcMove = function(oldfield , newfield){
                         if(this.steps[n][1] === 0){
                             // забиваем его значением нового поля
                             this.steps[n][1] = newfield;
-                            
+                            // сохраняем предыдущий шаг
+                            this.steps[n][2] = oldfield;
+                            // сохраняем идентификатор фихи
+                            this.steps[n][3] = pieceid;
                             break;
                         }
                     }
@@ -188,6 +240,10 @@ Rules.prototype.calcMove = function(oldfield , newfield){
                     if(elemfree !== false){
                         // забиваем ее значение номером новго поля
                         this.steps[elemfree][1] = oldfield + points * freecounter;
+                        // сохраняем прежнюю позицию
+                        this.steps[elemfree][2] = oldfield;
+                        // сохраняем идентификатор фихи
+                        this.steps[elemfree][3] = oldfield;
                     }else{
                         return oldfield;
                     }
@@ -251,7 +307,7 @@ Rules.prototype.canMove = function ( field ) {
         
         for(var i = 1; i <= free; i++){
             result = this.handleRules(field , field + this.steps[0][0] * i);
-            if(result){return true};
+            if(result){return true;}
         }
         
         return result;
