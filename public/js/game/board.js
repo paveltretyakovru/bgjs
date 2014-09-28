@@ -116,6 +116,14 @@ Board.prototype.calcField = function(x , y){
 		}
 	}
 	
+	if(x > fields[6].x && x < fields[7].x - 21){
+	    if(y >= top_height){
+	        num = 6;
+	    }else{
+	        num = 18;
+	    }
+	}
+	
 	return num;
 };
 
