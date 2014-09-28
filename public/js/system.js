@@ -18,14 +18,16 @@ $(document).ready(function(){
     
     /*      ### Работа с сервером ###       */
     
-    // регистрируемся на сервере
-    window.game.registrOnServer({id : randomNumber(1 , 1000)});
-    
-    // инициализируем игровую доску
-    window.board.init();
-    
-    // получаем стартовые данные игры
-    window.game.setListener('takeGameData' , 'Game' , 'takeGameData');
+    window.game.loadImages(function(){
+        // регистрируемся на сервере
+        window.game.registrOnServer({id : randomNumber(1 , 1000)});
+        
+        // инициализируем игровую доску
+        window.board.init();
+        
+        // получаем стартовые данные игры
+        window.game.setListener('takeGameData' , 'Game' , 'takeGameData');
+        });
     
     function randomNumber(min, max){
     	var rand = min - 0.5 + Math.random()*(max-min+1);

@@ -1,6 +1,14 @@
-var Piece = function(color , id , layer , stage , type){
+var Piece = function(color , id , layer , stage , type , imageObjects){
     var imagesrc = '';
     var controll = true;
+    
+    if(imageObjects !== undefined){
+        this.whiteObj = imageObjects.white;
+        this.blackObj = imageObjects.black;
+    }else{
+        controll = false;
+        console.error("Ошибка при загрузки изображений фишек");
+    }
     
     if(layer !== undefined && stage !== undefined && id !== undefined && type !== undefined){
         this.layer  = layer;
@@ -10,7 +18,7 @@ var Piece = function(color , id , layer , stage , type){
         this.color  = color;
     }else{
         controll    = false;
-        console.log('Один из параметров создания фишки равен undefined: ' , color , id , type);
+        console.error('Один из параметров создания фишки равен undefined: ' , color , id , type);
     }
     
     switch (color) {
@@ -27,9 +35,16 @@ var Piece = function(color , id , layer , stage , type){
     
     if(controll){
         // инициализируем изображение
-        var pimage = new Image();
-        pimage.src = imagesrc;
+        var pimage;
         
+        if(color === 'white'){
+            pimage = this.whiteObj;
+        }else if(color === 'black'){
+            pimage = this.blackObj;
+        }
+        
+        //pimage = new Image();
+        //pimage.src = imagesrc;
         
         // создаем Kineticjs изображение
         var pimageobj = new Kinetic.Image({
@@ -78,3 +93,6 @@ Piece.prototype.color   = '';
 Piece.prototype.layer   = {};
 Piece.prototype.stage   = {};
 Piece.prototype.obj     = {};
+
+Piece.prototype.blackObj;
+Piece.prototype.whiteObj;

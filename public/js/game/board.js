@@ -124,7 +124,7 @@ Board.prototype.calcField = function(x , y){
     # Создание доски
     #
 */
-Board.prototype.init    = function(){
+Board.prototype.init = function(){
     var self = this;
     
     // создаем главнй объект игрового поля

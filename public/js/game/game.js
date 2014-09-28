@@ -26,6 +26,8 @@ Game.prototype.timelot      = 3000;
 
 Game.prototype.enemy        = {};
 
+Game.prototype.imageObjects = {};
+
 Game.prototype.step         = {
     player  : '' ,      // self || enemy 
     bones   : [] ,
@@ -50,18 +52,23 @@ Game.prototype.setMessage = function(message){
     #
 */
 Game.prototype.initPieces = function(pieces){
+    
+    this.pieces = [];
+    
     switch(this.type){
         /*  
             ########     ########       ########    ########
             ####   Тип создания фишек для длинных нард  ####
             ########    ########        ########    ########
         */
+        
         case 'long':
             for(var i = 0; i < 30; i++){
                 var pieceid = pieces[i];
                 if (i < 15){
                     // создаем объекты фишек
-                    this.pieces[i] = new Piece( 'white' , pieceid , this.board.mainlayer , this.board.stage , 'left') ;
+                    
+                    this.pieces[i] = new Piece( 'white' , pieceid , this.board.mainlayer , this.board.stage , 'left' , this.imageObjects) ;
 
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
@@ -80,7 +87,7 @@ Game.prototype.initPieces = function(pieces){
                         }
                     }
                 }else{
-                    this.pieces[i] = new Piece( 'black' , pieceid , this.board.mainlayer , this.board.stage , 'right') ;
+                    this.pieces[i] = new Piece( 'black' , pieceid , this.board.mainlayer , this.board.stage , 'right' , this.imageObjects) ;
                     
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
@@ -209,8 +216,12 @@ Game.prototype.activatePieces = function(){
                 }else{
                     console.log('CANT MOVE! :-(');
                 }
-            }else{console.log('Это не поле игрока' , field);}
-        }else{console.log('Длина поля равна нулю' , field);}       // if pieces.length !== 0
+            }else{
+                if(field === 1 || field === 13){
+                    console.log('Это не поле игрока' , field);
+                }
+            }
+        }       // if pieces.length !== 0
     }           // for fields
 };
 
@@ -357,10 +368,21 @@ Game.prototype.myField = function(field){
            // значит поле игрока
            return true;
        }else{
+           if(field === 1){
+            console.log('Не совпадает цвет фишки. ' 
+                        + '  piececolor:' + this.pieces[piecenum].color 
+                        + '; mycolor: ' + this.piececolor 
+                        + '; pieceid: ' + this.pieces[piecenum].id
+                        + '; piecenum: ' + piecenum);
+                        this.pieces[piecenum].obj.stroke('green');
+           }
            return false;
        }
     // если поле свободное
     }else{
+        if(field === 1){
+            console.log('Поле свободное' , field);
+        }
         return false;
     }
 };
@@ -404,6 +426,8 @@ Game.prototype.calcPoints = function(){
 */
 Game.prototype.takeGameData = function(data){
     var self = this;
+    
+    console.log(data);
     
     if(typeof(data) === 'object'){
         if('id' in data && 'pieces' in data && 'bones' in data && 'lotbones' in data){
@@ -510,3 +534,20 @@ Game.prototype.animateLot = function(lots){
         }
     }, shaketime);
 };
+
+Game.prototype.loadImages = function(callback){
+    var self = this;
+    var imagesrcWhite    = '../images/pieces/white.png';
+    var imagesrcBlack    = '../images/pieces/black.png';
+    
+    var whiteObj = new Image();
+    var blackObj = new Image();
+    
+    whiteObj.onload = function(){
+        self.imageObjects = {white : whiteObj , black : blackObj};
+        
+        callback();
+    };
+    whiteObj.src = imagesrcWhite;
+    blackObj.src = imagesrcBlack;
+}
