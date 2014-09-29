@@ -35,7 +35,7 @@ Rules.prototype.handleRules = function(oldfield , newfield){
     return ruleresult;
 };
 
-Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
+Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
     var result = oldfield;
     
     /*
@@ -148,6 +148,12 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
             return can3;
         }
         
+        
+        console.log('controll clickboard' , clickboard);
+        
+        // если к функции идет обращение через клик на доску
+        if(clickboard !== undefined) return false;
+        
         // иначе ходим минамально возможным либо суммой
         if(can1) {
             this.steps[0][1] = can1;
@@ -183,7 +189,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
             return can3
         };
     }
-    
+
     /*
         # Правила для дубля
     */
@@ -241,6 +247,10 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
         // Если на переведенное поле не может сходить фишка,
         // переводим на ближайшее возможное
         
+        console.log('controll clickboard' , clickboard);
+        
+        if(clickboard !== undefined) return false;
+        
         var controll = true;
         var freecounter = 1;
         
@@ -290,7 +300,8 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
             
             freecounter++;
         }
-        
+
+    
     } // steps.length === 4
     
     

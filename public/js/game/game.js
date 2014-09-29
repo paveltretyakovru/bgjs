@@ -22,8 +22,10 @@ Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
 Game.prototype.piececolor   = '';       // white || black
 // timers
-Game.prototype.timelot      = 3000;
-Game.prototype.cancelStep   = 3000;
+Game.prototype.timelot      = 3000; // общее время жеребьевки
+Game.prototype.cancelStep   = 3000; // время на отмену хода
+Game.prototype.dblclicktime = 200;  // ожидание да двойной клик
+Game.prototype.ruletimemes  = 2000; // время на выведение сообщений системы правил
 
 Game.prototype.enemy        = {};
 
@@ -36,6 +38,9 @@ Game.prototype.step         = {
     steps   : {} ,
     points  : 0
 };
+
+// global vars
+Game.prototype.selectedpiece = false;
 
 
 /*
@@ -303,18 +308,38 @@ Game.prototype.finishSteps = function(){
 };
 
 Game.prototype.setDraggable = function(piece , oldfield){
+    var timer;
     
     var self        = this;
     var pieceobj    = this.getPiece(piece.id());
     
+    // устанавливаем клики по доске
+    this.setClickBoard();
+    
     piece.draggable(true);
     
-    
     /*
-    piece.on('click' , function(){
-        
-    });
+        # Отрабатываем клики на фишке
     */
+    // одинарный клик выделяет фишку для будущего перемещения
+    piece.on('click' , function(){
+        var node = this;
+        if(timer) clearTimeout(timer);
+        
+        timer = setTimeout(function() {
+            console.log('single');
+            
+            self.selectPiece(node);
+            
+        }, self.dblclicktime);
+    });
+    
+    piece.on('dblclick' , function(){
+        clearTimeout(timer);
+        console.log('double');
+        
+        // dblclick action
+    });
     
     piece.on('dragend' , function(){
         var node = this;
@@ -349,6 +374,82 @@ Game.prototype.setDraggable = function(piece , oldfield){
         self.activatePieces();
     });
     
+};
+
+/*
+    # Одинарный клик по фишке, выделяет её
+    # для дальнейшей манипуляции
+*/
+Game.prototype.selectPiece = function(piece){
+    this.unselectPiece();
+    
+	this.selectedpiece = piece;
+	this.selectedpiece.strokeEnabled(true);
+	this.selectedpiece.stroke('#000');						
+	this.board.stage.batchDraw();
+};
+
+/*
+    # Проверяем и снимаем выделение с выделенной фишки
+*/
+Game.prototype.unselectPiece = function(){
+    if(this.selectedpiece !== false){
+	    this.selectedpiece.strokeEnabled(false);
+	    this.selectedpiece = false;
+	}
+};
+
+/*
+    # отрабатываем клики по самой доске
+*/
+Game.prototype.setClickBoard = function(){
+    var self = this;
+    
+    this.board.mainlayer.on('click' , function(){
+        if(self.selectedpiece !== false){
+            var selectedpos = self.calcPiecePos(self.selectedpiece.id());
+            var piece = self.getPiece(self.selectedpiece.id());
+            
+            // получаем координаты курсора
+            var mousePos = self.board.stage.getPointerPosition();
+            
+            // вычисляем поле на котором остановилась фишка
+            var newfield    = self.board.calcField(mousePos.x , mousePos.y);
+            
+            // вычисляем поле, на которое может сходить фишка
+            var movefield   = self.rules.calcMove(selectedpos[0] , newfield , self.selectedpiece.id() , true);
+            
+            // если можно сходить по кликанному полю
+            if(movefield !== false){
+                // удаляем идентификатор фишки из предыдущей позиции
+                var lastpos     = self.calcPiecePos(self.selectedpiece.id());
+                self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                
+                // вычисляем координаты поля на которое можно сходить
+                var pos         = self.board.calcLastFieldPos(movefield);
+                
+                // перемещаем идентификатор фишки
+                self.moveIdPiece(movefield , self.selectedpiece.id());
+                
+                // перемещаем фишку
+                piece.moveTo(pos.x , pos.y);
+                
+                // после завершения хода блокируем фишки, для новых расчетов
+                self.blockedPieces();
+                
+                // очищаем обработчик перемещения для новых расчетов
+                self.selectedpiece.off('dragend');
+                this.off('click');
+                
+                self.activatePieces();
+            }else{
+                self.setMessage("Невозможно сходить на данное поле");
+                setTimeout(function() {
+                    self.setMessage("Ваш ход");
+                }, self.ruletimemes);
+            }
+        }
+    });
 };
 
 /*
