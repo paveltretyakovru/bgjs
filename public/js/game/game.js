@@ -428,8 +428,8 @@ Game.prototype.takeGameData = function(data){
             if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                //this.step.bones = data.bones;
-                this.step.bones = [2 , 2];
+                this.step.bones = data.bones;
+                //this.step.bones = [2 , 2];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);

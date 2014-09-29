@@ -66,9 +66,10 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
         # Классическое высчитывание кода
     */
     if(this.steps.length === 2){
-        var can1 = false;
-        var can2 = false;
-        var can3 = false;
+        var can1        = false;
+        var can2        = false;
+        var can3        = false;
+        var stepover    = false;
         
         if(this.steps[0][1] === 0){
             
@@ -79,9 +80,25 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
         }
         
         if(this.steps[1][1] === 0){
-            result = this.handleRules(oldfield , this.steps[1][0] + oldfield);
-            if(result){
-                can2 = this.steps[1][0] + oldfield;
+            /* Делаем перешаг на вторую кость, если это возможно */
+            if(this.steps[0][1] !== 0){
+                
+                if(this.steps[0][3] === pieceid){
+                    result = this.handleRules(this.steps[0][2] , this.steps[1][0] + this.steps[0][2]);
+                    
+                    if(result){
+                        can2        = this.steps[1][0] + this.steps[0][2];
+                        stepover    = true;
+                    }
+                }else{console.log('id !== :(');}
+            }else{
+                /*
+                    # Либо делаем ход на вторую кость классически :-)
+                */
+                result = this.handleRules(oldfield , this.steps[1][0] + oldfield);
+                if(result){
+                    can2 = this.steps[1][0] + oldfield;
+                }
             }
         }
         
@@ -133,6 +150,16 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
             this.steps[1][1] = can2;
             this.steps[1][2] = oldfield; // сохраняем предыдущиее поле
             this.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
+            
+            // если сделан перешаг
+            if(stepover){
+                this.steps[1][2] = this.steps[0][2];
+                
+                this.steps[0][1] = 0;
+                this.steps[0][2] = 0;
+                this.steps[0][3] = 0;
+            }
+            
             return can2;
         };
         if(can3) {
