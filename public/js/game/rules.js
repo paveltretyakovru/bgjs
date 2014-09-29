@@ -15,8 +15,6 @@ Rules.prototype.setSteps = function(steps){this.steps = steps;};
 
 /*
     # Правило имеет ли поле фишки соперника
-    #
-    #
 */
 
 Rules.prototype.haveEnemy = function(){
@@ -25,8 +23,6 @@ Rules.prototype.haveEnemy = function(){
 
 /*
     # Функция перебирает правила хода и проверяет может ли сходить
-    #
-    #
 */
 Rules.prototype.handleRules = function(oldfield , newfield){
     var ruleresult = true;
@@ -43,11 +39,8 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
     var result = oldfield;
     
     /*
-        # Если игрок передвигает фишку назад
-        # то наверно он хочет вернуть фишку назад
-        # 
+        # Игрок передвигает фишку назад
     */
-    
     if(newfield < oldfield){
         for(var i = 0; i < this.steps.length; i++){
             // ищем в истории поле с которого передвинута фишка
@@ -69,6 +62,9 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
         }
     }
     
+    /*
+        # Классическое высчитывание кода
+    */
     if(this.steps.length === 2){
         var can1 = false;
         var can2 = false;
@@ -217,7 +213,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
             var countsteps = 0;
             
             for(var i = 0; i < steps.length; i++){
-                console.log(countsteps++ , steps[i][1]);
                 
                 if(steps[i][1] === 0){
                     return i;
@@ -243,7 +238,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
                         // сохраняем прежнюю позицию
                         this.steps[elemfree][2] = oldfield;
                         // сохраняем идентификатор фихи
-                        this.steps[elemfree][3] = oldfield;
+                        this.steps[elemfree][3] = pieceid;
                     }else{
                         return oldfield;
                     }

@@ -209,12 +209,10 @@ Game.prototype.activatePieces = function(){
                     // получаем последнюю фишку
                     var lastpiece = this.getLastPiece(field);
                     
-                    console.log('lastpiece' , lastpiece);
-                    
                     // запускаем разрешение передвигать фишку
                     this.setDraggable(lastpiece , field);
                 }else{
-                    console.log('CANT MOVE! :-(');
+                    console.log('Поле непередвигаемое' , field);
                 }
             }else{
                 if(field === 1 || field === 13){
@@ -226,7 +224,6 @@ Game.prototype.activatePieces = function(){
 };
 
 Game.prototype.setDraggable = function(piece , oldfield){
-    console.log("Активировали фишку :-)");
     
     var self        = this;
     var pieceobj    = this.getPiece(piece.id());
@@ -243,8 +240,6 @@ Game.prototype.setDraggable = function(piece , oldfield){
         
         // вычисляем поле, на которое может сходить фишка
         var movefield   = self.rules.calcMove(oldfield , newfield , node.id());
-        
-        console.log('movefield' , movefield);
         
         // вычисляем координаты поля на которое можно сходить
         var pos         = self.board.calcLastFieldPos(movefield);
@@ -280,8 +275,6 @@ Game.prototype.blockedPieces = function(){
 */
 Game.prototype.moveIdPiece = function(newfield , id){
     var lastpos = this.calcPiecePos(id);
-    
-    console.log(newfield , id , lastpos);
     
     this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
     this.board.fields[newfield].pieces.push(id);
@@ -403,7 +396,7 @@ Game.prototype.calcPoints = function(){
     
     var st = [];
     
-    // st[ячейка очка] = [номер кости , поля занятое ячейкой , старое поле, id фишки]
+    // st[ячейка очка] = [значение кости , поля занятое ячейкой , старое поле, id фишки]
     
     if(steps === 2){
         st[0] = [bone1 , 0 , 0 , 0];
@@ -429,15 +422,13 @@ Game.prototype.calcPoints = function(){
 Game.prototype.takeGameData = function(data){
     var self = this;
     
-    console.log(data);
-    
     if(typeof(data) === 'object'){
         if('id' in data && 'pieces' in data && 'bones' in data && 'lotbones' in data){
             if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                this.step.bones = data.bones;
-                //this.step.bones = [2 , 2];
+                //this.step.bones = data.bones;
+                this.step.bones = [2 , 2];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
