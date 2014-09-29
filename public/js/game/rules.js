@@ -90,7 +90,16 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
                         can2        = this.steps[1][0] + this.steps[0][2];
                         stepover    = true;
                     }
-                }else{console.log('id !== :(');}
+                }else{
+                    console.log('id !== :(');
+                    /*
+                        # Либо делаем ход на вторую кость классически :-)
+                    */
+                    result = this.handleRules(oldfield , this.steps[1][0] + oldfield);
+                    if(result){
+                        can2 = this.steps[1][0] + oldfield;
+                    }
+                }
             }else{
                 /*
                     # Либо делаем ход на вторую кость классически :-)
@@ -283,6 +292,10 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid){
         }
         
     } // steps.length === 4
+    
+    
+    // если ничего не дало результата, возвращаем прежнюю позицию
+    return result;
 };
 
 /*

@@ -23,6 +23,7 @@ Game.prototype.side         = '';       // left || right
 Game.prototype.piececolor   = '';       // white || black
 // timers
 Game.prototype.timelot      = 3000;
+Game.prototype.cancelStep   = 3000;
 
 Game.prototype.enemy        = {};
 
@@ -187,11 +188,41 @@ Game.prototype.letsRock = function(){
 };
 
 /*
+    # Чистим необходимые данные
+*/
+Game.prototype.clearData = function(){
+    
+};
+
+/*
+    # Считаем сколько у нас полей в распоряжении 
+*/
+Game.prototype.calcMyFields = function(){
+    var countfields = 0;
+    
+    // перебираем поля
+    for(var field = 1; field < this.board.fields.length; field++){
+        // если поле содержит фишки
+        if(this.board.fields[field].pieces.length !== 0){
+            // является ли поле игрока
+            if(this.myField(field)){
+                countfields++;
+            }
+        }
+    }
+    
+    return countfields;
+};
+
+/*
     # Перебирает поля и активирует возможно ходящие фишки
     #
     #
 */
 Game.prototype.activatePieces = function(){
+    var countcanmove    = 0;
+    var self            = this;
+    
     // отправляем в прававой объект поля доски
     this.rules.setFields(this.board.fields);
     // отправляем объект шагов правовому объетку
@@ -206,6 +237,8 @@ Game.prototype.activatePieces = function(){
                 var canmove = this.rules.canMove(field);
                 // если поле может ходить
                 if(canmove){
+                    countcanmove++;
+                    
                     // получаем последнюю фишку
                     var lastpiece = this.getLastPiece(field);
                     
@@ -221,6 +254,52 @@ Game.prototype.activatePieces = function(){
             }
         }       // if pieces.length !== 0
     }           // for fields
+    
+    /*
+        # Если закончились шаги
+        # даем возможность отмены хода
+    */
+    if(countcanmove === 0){
+        console.log("Закончились шаги");
+        this.setMessage("Отмена хода 3 сек");
+        
+        var piece , piecepos;
+        var pieces = [];
+        
+        // собираем фишки для активации
+        for(var i = 0; i < this.step.steps.length; i++){
+            if(pieces.indexOf(this.step.steps[i][3]) === -1){
+                pieces.push(this.step.steps[i][3])
+            }
+        }
+        
+        console.log('last pieces: ' , pieces);
+        
+        // пробигаемся по этим фишкам и активируем
+        for(var i = 0; i < pieces.length; i++){
+            piece       = this.getPiece(pieces[i]);
+            piecepos    = this.calcPiecePos(pieces[i]);
+            
+            // активируем фишки, которыми ходили
+            this.setDraggable(piece.obj , piecepos[0]);
+        }
+        
+        // если игрок не отменил свой ход передаем ход
+        setTimeout(function() {
+                if(self.lastStep()){
+                    self.finishSteps();
+                }else{
+                    self.setMessage("Ход отменен");
+                }
+        }, self.cancelStep);
+    }
+};
+
+Game.prototype.finishSteps = function(){
+    console.info('Закончился ход');
+    this.setMessage('Передача хода');
+    this.blockedPieces();
+    
 };
 
 Game.prototype.setDraggable = function(piece , oldfield){
@@ -229,6 +308,13 @@ Game.prototype.setDraggable = function(piece , oldfield){
     var pieceobj    = this.getPiece(piece.id());
     
     piece.draggable(true);
+    
+    
+    /*
+    piece.on('click' , function(){
+        
+    });
+    */
     
     piece.on('dragend' , function(){
         var node = this;
@@ -258,11 +344,40 @@ Game.prototype.setDraggable = function(piece , oldfield){
         self.blockedPieces();
         
         // очищаем обработчик перемещения для новых расчетов
-        this.off('dragend');
+        node.off('dragend');
         
         self.activatePieces();
     });
     
+};
+
+/*
+    # Функция проверяет сделан ли последний шаг
+*/
+Game.prototype.lastStep = function(){
+    var countcomplete = 0;
+    
+    for(var i = 0; i < this.step.steps.length; i++){
+        if(this.step.steps[i][1] !== 0){
+            countcomplete++;
+        }
+    }
+    
+    if(this.step.steps.length === 2){
+        if(countcomplete === 2){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    if(this.step.steps.length === 4){
+        if(countcomplete === 4){
+            return true;
+        }else{
+            return false;
+        }
+    }
 };
 
 Game.prototype.blockedPieces = function(){
