@@ -241,6 +241,10 @@ Game.prototype.setDraggable = function(piece , oldfield){
         // вычисляем поле, на которое может сходить фишка
         var movefield   = self.rules.calcMove(oldfield , newfield , node.id());
         
+        // удаляем идентификатор фишки из предыдущей позиции
+        var lastpos     = self.calcPiecePos(node.id());
+        self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+        
         // вычисляем координаты поля на которое можно сходить
         var pos         = self.board.calcLastFieldPos(movefield);
         
@@ -274,9 +278,6 @@ Game.prototype.blockedPieces = function(){
     #
 */
 Game.prototype.moveIdPiece = function(newfield , id){
-    var lastpos = this.calcPiecePos(id);
-    
-    this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
     this.board.fields[newfield].pieces.push(id);
 };
 
