@@ -74,7 +74,14 @@ Game.prototype.initPieces = function(pieces){
                 if (i < 15){
                     // создаем объекты фишек
                     
-                    this.pieces[i] = new Piece( 'white' , pieceid , this.board.mainlayer , this.board.stage , 'left' , this.imageObjects) ;
+                    this.pieces[i] = new Piece(
+                                                'white' ,
+                                                pieceid ,
+                                                this.board.mainlayer ,
+                                                this.board.stage ,
+                                                'left' ,
+                                                this.imageObjects
+                                            );
 
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
@@ -84,26 +91,49 @@ Game.prototype.initPieces = function(pieces){
                             this.enemy.side = 'left';
                             this.side       = 'right';
                             
-                            this.startPiecesPositions(this.pieces[i].obj , 13 , this.pieces[i]);
+                            this.startPiecesPositions(
+                                this.pieces[i].obj ,
+                                13 ,
+                                this.pieces[i]
+                                );
                         }else{
                             // располагаем черные справа
                             this.enemy.side = 'right';
                             this.side       = 'left';
-                            this.startPiecesPositions(this.pieces[i].obj , 1 , this.pieces[i]);
+                            this.startPiecesPositions(
+                                this.pieces[i].obj ,
+                                1 ,
+                                this.pieces[i]
+                            );
                         }
                     }
                 }else{
-                    this.pieces[i] = new Piece( 'black' , pieceid , this.board.mainlayer , this.board.stage , 'right' , this.imageObjects) ;
+                    this.pieces[i] = new Piece(
+                            'black' ,
+                            pieceid ,
+                            this.board.mainlayer ,
+                            this.board.stage ,
+                            'right' ,
+                            this.imageObjects
+                        );
                     
                     // если фишки должны всегда находиться в одном положении
                     if(this.onepos){
                         // если соперник выиграл
                         if(this.step.player === 'enemy'){
                             // распологаем черные справа
-                            this.startPiecesPositions(this.pieces[i].obj , 1 , this.pieces[i]);
+                            this.startPiecesPositions(
+                                this.pieces[i].obj ,
+                                1 ,
+                                this.pieces[i]
+                            );
                         }else{
                             // распологаяем черные слева
-                            this.startPiecesPositions(this.pieces[i].obj , 13 , this.pieces[i]);
+                            this.startPiecesPositions(
+                                this.pieces[i].obj ,
+                                13 ,
+                                this.pieces[i]
+                            );
                         }
                     }
                 }
@@ -151,8 +181,14 @@ Game.prototype.setListener = function(name , obj , fun){
             if(obj in self){
                 if(fun in self[obj]){
                     self[obj][fun](data);
-                }else{console.error("Обращение к несуществующему методу в объекте " , obj , fun)}
-            }else{ console.error("Обращение к несуществующему объекту " , obj); }
+                }else{
+                    console.error(
+                            "Обращение к несуществующему методу в объекте " ,
+                            obj ,
+                            fun
+                        );
+                }
+            }else{ console.error("Обращение к несуществующему объекту " , obj);}
         }
     });
 };
@@ -181,7 +217,9 @@ Game.prototype.letsRock = function(){
     var player = this.step.player;
     
     // Выводим сообщение
-    if(player === 'enemy'){this.setMessage('Ход противника');}else{this.setMessage('Ваш ход');}
+    if(player === 'enemy'){
+        this.setMessage('Ход противника');
+    }else{this.setMessage('Ваш ход');}
     
     if(player === 'self'){
         // Считаем количество ходов
@@ -278,8 +316,6 @@ Game.prototype.activatePieces = function(){
             }
         }
         
-        console.log('last pieces: ' , pieces);
-        
         // пробигаемся по этим фишкам и активируем
         for(var i = 0; i < pieces.length; i++){
             piece       = this.getPiece(pieces[i]);
@@ -327,18 +363,40 @@ Game.prototype.setDraggable = function(piece , oldfield){
         if(timer) clearTimeout(timer);
         
         timer = setTimeout(function() {
-            console.log('single');
             
             self.selectPiece(node);
             
         }, self.dblclicktime);
     });
     
+    // двойной клик по фишке перемещает фишку на минимальное значение
     piece.on('dblclick' , function(){
-        clearTimeout(timer);
-        console.log('double');
+        var node = this;
         
-        // dblclick action
+        clearTimeout(timer);
+        
+        var nowfield = self.calcPiecePos(node.id())
+        
+        // вычисляем поле, на которое может сходить фишка
+        var movefield   =   self.rules.calcMove(
+                                oldfield ,
+                                nowfield[0] + 1 ,
+                                node.id()
+                            );
+        
+        // удаляем идентификатор фишки из предыдущей позиции
+        var lastpos     = self.calcPiecePos(node.id());
+        self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+        
+        // вычисляем координаты поля на которое можно сходить
+        var pos         = self.board.calcLastFieldPos(movefield);
+        
+        pieceobj.moveTo(pos.x , pos.y);
+        
+        // перемещаем идентификатор фишки
+        self.moveIdPiece(movefield , node.id());
+        
+        
     });
     
     piece.on('dragend' , function(){
@@ -365,15 +423,24 @@ Game.prototype.setDraggable = function(piece , oldfield){
         // перемещаем фишку
         pieceobj.moveTo(pos.x , pos.y);
         
-        // после завершения хода блокируем фишки, для новых расчетов
-        self.blockedPieces();
-        
-        // очищаем обработчик перемещения для новых расчетов
-        node.off('dragend');
-        
-        self.activatePieces();
     });
     
+};
+
+Game.prototype.endDrag = function(node){
+    // очищаем обработчики перемещения для новых расчетов
+    node.off('dragend');
+    node.off('click');
+    node.off('dblclick');
+    this.board.mainlayer.off('click');
+    
+    // снимаем выделение выделенной фишки
+    //this.unselectPiece();
+    
+    // после завершения хода блокируем фишки, для новых расчетов
+    this.blockedPieces();
+    
+    this.activatePieces();
 };
 
 /*
@@ -381,12 +448,24 @@ Game.prototype.setDraggable = function(piece , oldfield){
     # для дальнейшей манипуляции
 */
 Game.prototype.selectPiece = function(piece){
-    this.unselectPiece();
+    var self = this;
     
-	this.selectedpiece = piece;
-	this.selectedpiece.strokeEnabled(true);
-	this.selectedpiece.stroke('#000');						
-	this.board.stage.batchDraw();
+    function select(piece){
+        self.selectedpiece = piece;
+        self.selectedpiece.strokeEnabled(true);
+        self.selectedpiece.stroke('#000');						
+	    self.board.stage.batchDraw();
+    }
+    
+    if(this.selectedpiece === false){
+        select(piece);
+        
+    // если кликнули на ту же самую фишку - снимаем выделение
+    }else if(this.selectedpiece.id() !== piece.id()){
+        select(piece);
+    }else{
+        this.unselectPiece();
+    }
 };
 
 /*
@@ -396,6 +475,7 @@ Game.prototype.unselectPiece = function(){
     if(this.selectedpiece !== false){
 	    this.selectedpiece.strokeEnabled(false);
 	    this.selectedpiece = false;
+	    this.board.stage.batchDraw();
 	}
 };
 
@@ -417,7 +497,12 @@ Game.prototype.setClickBoard = function(){
             var newfield    = self.board.calcField(mousePos.x , mousePos.y);
             
             // вычисляем поле, на которое может сходить фишка
-            var movefield   = self.rules.calcMove(selectedpos[0] , newfield , self.selectedpiece.id() , true);
+            var movefield   =   self.rules.calcMove(
+                                    selectedpos[0] ,
+                                    newfield ,
+                                    self.selectedpiece.id() ,
+                                    true
+                                );
             
             // если можно сходить по кликанному полю
             if(movefield !== false){
@@ -613,7 +698,7 @@ Game.prototype.calcPoints = function(){
     
     var st = [];
     
-    // st[ячейка очка] = [значение кости , поля занятое ячейкой , старое поле, id фишки]
+    //st[ячейка очка] = [valbone , текущее поле , старое поле, id фишки]
     
     if(steps === 2){
         st[0] = [bone1 , 0 , 0 , 0];
@@ -640,8 +725,18 @@ Game.prototype.takeGameData = function(data){
     var self = this;
     
     if(typeof(data) === 'object'){
-        if('id' in data && 'pieces' in data && 'bones' in data && 'lotbones' in data){
-            if(data.id !== undefined && data.pieces !== undefined && data.bones !== undefined && data.lotbones !== undefined){
+        if(
+                'id'         in data
+            &&  'pieces'     in data
+            &&  'bones'      in data
+            &&  'lotbones'   in data
+        ){
+            if(
+                data.id         !== undefined
+                && data.pieces  !== undefined
+                && data.bones   !== undefined
+                && data.lotbones!== undefined
+            ){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
                 this.step.bones = data.bones;

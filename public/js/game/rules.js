@@ -38,6 +38,8 @@ Rules.prototype.handleRules = function(oldfield , newfield){
 Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
     var result = oldfield;
     
+    console.log('newfield: ' , newfield);
+    
     /*
         # Игрок передвигает фишку назад
     */

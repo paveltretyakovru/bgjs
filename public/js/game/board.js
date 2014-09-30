@@ -88,7 +88,7 @@ Board.prototype.checkCorrectFieldNum = function(fieldnum){
 */
 Board.prototype.calcField = function(x , y){
     var fields 		= this.fields;
-	var width 		= this.pieceheight / 2 + 15;
+	var width 		= this.pieceheight / 2 + 10;
 	var top_height 	= this.height / 2;
 	var num 		= 1;
 	
