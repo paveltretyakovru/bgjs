@@ -257,6 +257,18 @@ Game.prototype.calcMyFields = function(){
     return countfields;
 };
 
+Game.prototype.countFreeSteps = function(){
+    var count = 0;
+    
+    for(var i = 0; i < this.step.steps.length; i++){
+        if(this.step.steps[i][1] === 0){
+            count++;
+        }
+    }
+    
+    return count;
+};
+
 /*
     # Перебирает поля и активирует возможно ходящие фишки
     #
@@ -281,6 +293,9 @@ Game.prototype.activatePieces = function(){
                 // если поле может ходить
                 if(canmove){
                     countcanmove++;
+                    
+                    // получаем количество оставшихся ходов
+                    var countfreesteps = this.countFreeSteps();
                     
                     // получаем последнюю фишку
                     var lastpiece = this.getLastPiece(field);
@@ -345,13 +360,13 @@ Game.prototype.finishSteps = function(){
 
 Game.prototype.setDraggable = function(piece , oldfield){
     var timer;
-    
     var self        = this;
     var pieceobj    = this.getPiece(piece.id());
     
     // устанавливаем клики по доске
     this.setClickBoard();
     
+    // делаем фишку перетаскиваемой
     piece.draggable(true);
     
     /*
@@ -396,7 +411,19 @@ Game.prototype.setDraggable = function(piece , oldfield){
         // перемещаем идентификатор фишки
         self.moveIdPiece(movefield , node.id());
         
-        
+        // завершающие действия хода
+        self.endDrag(node);
+    });
+    
+    function mouse(){
+        self.board.stage.on('mousemove' , function(){
+            pos = this.getPointerPosition();
+            console.log('x: ' + pos.x + ' y: ' + pos.y);
+        });
+    }
+    
+    piece.on('dragmove' , function(evt){
+        // self.board.stage.getPointerPosition();
     });
     
     piece.on('dragend' , function(){
@@ -422,6 +449,9 @@ Game.prototype.setDraggable = function(piece , oldfield){
         
         // перемещаем фишку
         pieceobj.moveTo(pos.x , pos.y);
+        
+        // завершающие действия хода
+        self.endDrag(node);
         
     });
     
@@ -485,6 +515,8 @@ Game.prototype.unselectPiece = function(){
 Game.prototype.setClickBoard = function(){
     var self = this;
     
+    if(this.selectedpiece !== false){
+    
     this.board.mainlayer.on('click' , function(){
         if(self.selectedpiece !== false){
             var selectedpos = self.calcPiecePos(self.selectedpiece.id());
@@ -535,6 +567,8 @@ Game.prototype.setClickBoard = function(){
             }
         }
     });
+    
+    } // if selectedpiece !== false;
 };
 
 /*
@@ -601,7 +635,32 @@ Game.prototype.calcPiecePos = function(id){
 		}
 	}
 	return piece;
-}
+};
+
+/*
+    # Функция возвращает count количество последних фишек в поле field
+*/
+Game.prototype.getLastPieces = function(field , count){
+    var result      = [];
+    var controll    = true;
+    var counter     = 1;
+    var pieces      = this.board.fields[field].pieces;
+    
+    while(controll){
+        if(pieces[pieces.length - counter] !== undefined){
+            result.push(pieces[pieces.length - counter]);
+        }
+        
+        if(counter === count){controll = false;}
+        counter++;
+    }
+    
+    if(result.length !== 0){
+        return result;
+    }else{
+        return false;
+    }
+};
 
 /*
     # fun getLastPiece
