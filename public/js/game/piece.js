@@ -89,6 +89,7 @@ Piece.prototype.height  = 30;
 Piece.prototype.id      = '';
 Piece.prototype.type    = '';
 Piece.prototype.color   = '';
+Piece.prototype.last    = false;
 
 Piece.prototype.layer   = {};
 Piece.prototype.stage   = {};

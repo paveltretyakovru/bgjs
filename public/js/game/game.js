@@ -296,12 +296,14 @@ Game.prototype.activatePieces = function(){
                     
                     // получаем количество оставшихся ходов
                     var countfreesteps = this.countFreeSteps();
+                    var lastpieces = this.getLastPieces(field , countfreesteps);
                     
                     // получаем последнюю фишку
                     var lastpiece = this.getLastPiece(field);
                     
-                    // запускаем разрешение передвигать фишку
-                    this.setDraggable(lastpiece , field);
+                    this.setDraggablePieces(lastpieces , field);
+                    
+                    
                 }else{
                     console.log('Поле непередвигаемое' , field);
                 }
@@ -358,22 +360,21 @@ Game.prototype.finishSteps = function(){
     
 };
 
-Game.prototype.setDraggable = function(piece , oldfield){
+
+/*
+    # Отрабатываем клики на фишке
+*/
+Game.prototype.setClicksPiece = function(node , oldfield){
+    var pieceobj = this.getPiece(node.id());
+    var self = this;
     var timer;
-    var self        = this;
-    var pieceobj    = this.getPiece(piece.id());
     
-    // устанавливаем клики по доске
-    this.setClickBoard();
+    console.log('last: ' , pieceobj.last);
     
-    // делаем фишку перетаскиваемой
-    piece.draggable(true);
+    // если фишка последняя в ряду, то ее можно выделять
+    if(pieceobj.last){
     
-    /*
-        # Отрабатываем клики на фишке
-    */
-    // одинарный клик выделяет фишку для будущего перемещения
-    piece.on('click' , function(){
+    node.on('click' , function(){
         var node = this;
         if(timer) clearTimeout(timer);
         
@@ -385,7 +386,7 @@ Game.prototype.setDraggable = function(piece , oldfield){
     });
     
     // двойной клик по фишке перемещает фишку на минимальное значение
-    piece.on('dblclick' , function(){
+    node.on('dblclick' , function(){
         var node = this;
         
         clearTimeout(timer);
@@ -412,52 +413,107 @@ Game.prototype.setDraggable = function(piece , oldfield){
         self.moveIdPiece(movefield , node.id());
         
         // завершающие действия хода
-        self.endDrag(node);
+        self.endDrag(pieceobj);
     });
     
-    function mouse(){
-        self.board.stage.on('mousemove' , function(){
-            pos = this.getPointerPosition();
-            console.log('x: ' + pos.x + ' y: ' + pos.y);
-        });
     }
+}
+
+Game.prototype.setDraggablePieces = function(pieces , field){
+    var self        = this;
+    var movelist    = [];
     
-    piece.on('dragmove' , function(evt){
-        // self.board.stage.getPointerPosition();
-    });
+    // устанавливаем клики по доске
+    this.setClickBoard();
+    
+    // перебираем фишки в данном поле
+    for(var i = 0; i < pieces.length; i++){
+        // указываем, что фишку можно выделять
+        if(i === 0) pieces[i].last = true;
+        
+        var n = i;
+        
+        if(n !== 0){
+            pieces[i].obj.on('dragmove' , function(){
+                var node = this;
+                
+                pieces[n - 1].obj.x(node.x());
+                pieces[n - 1].obj.y(node.y() - self.board.pieceheight);
+                self.board.stage.batchDraw();
+            });
+            
+            pieces[i].obj.on('dragstart' , function(){
+                console.log('dragstart');
+            });
+            
+            movelist.push(pieces[n-1]);
+            console.log('movelist: ' , movelist);
+        }
+        
+        this.setDraggable(pieces[i].obj , field , movelist);
+        
+    }
+};
+
+Game.prototype.setDraggable = function(piece , oldfield , lastpiece , movelist){
+    var self        = this;
+    var pieceobj    = this.getPiece(piece.id());
+    
+    // устанавливаем клики по фишке
+    this.setClicksPiece(piece , oldfield);
+    
+    // делаем фишку перетаскиваемой
+    piece.draggable(true);
+    
+    var move = movelist;
     
     piece.on('dragend' , function(){
-        var node = this;
-        var x = node.x();
-        var y = node.y();
+        var x = this.x();
+        var y = this.y();
         
-        // вычисляем поле на котором остановилась фишка
-        var newfield    = self.board.calcField(x , y);
+        self.movePiece(x , y , oldfield , pieceobj);
         
-        // вычисляем поле, на которое может сходить фишка
-        var movefield   = self.rules.calcMove(oldfield , newfield , node.id());
-        
-        // удаляем идентификатор фишки из предыдущей позиции
-        var lastpos     = self.calcPiecePos(node.id());
-        self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
-        
-        // вычисляем координаты поля на которое можно сходить
-        var pos         = self.board.calcLastFieldPos(movefield);
-        
-        // перемещаем идентификатор фишки
-        self.moveIdPiece(movefield , node.id());
-        
-        // перемещаем фишку
-        pieceobj.moveTo(pos.x , pos.y);
-        
-        // завершающие действия хода
-        self.endDrag(node);
-        
+        if(move !== undefined){
+            if(move.length !== 0){
+                for(var i = 0; i < movelist.length; i++){
+                    self.movePiece(x , y , oldfield , movelist[i]);
+                }
+            }
+        }
     });
     
 };
 
-Game.prototype.endDrag = function(node){
+Game.prototype.movePiece = function(x , y , oldfield , piece){
+    // вычисляем поле на котором остановилась фишка
+    var newfield    = this.board.calcField(x , y);
+        
+    // вычисляем поле, на которое может сходить фишка
+    var movefield   = this.rules.calcMove(oldfield , newfield , piece.id);
+        
+    // удаляем идентификатор фишки из предыдущей позиции
+    var lastpos     = this.calcPiecePos(piece.id);
+    this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+        
+    // вычисляем координаты поля на которое можно сходить
+    var pos         = this.board.calcLastFieldPos(movefield);
+        
+    // перемещаем идентификатор фишки
+    this.moveIdPiece(movefield , piece.id);
+        
+    // перемещаем фишку
+    piece.moveTo(pos.x , pos.y);
+    
+    if(piece.last){
+        // завершающие действия хода
+        this.endDrag(pieceobj);
+    }else{
+            
+    }
+};
+
+Game.prototype.endDrag = function(piece){
+    var node = piece.obj;
     // очищаем обработчики перемещения для новых расчетов
     node.off('dragend');
     node.off('click');
@@ -485,14 +541,17 @@ Game.prototype.selectPiece = function(piece){
         self.selectedpiece.strokeEnabled(true);
         self.selectedpiece.stroke('#000');						
 	    self.board.stage.batchDraw();
+	    
     }
     
     if(this.selectedpiece === false){
         select(piece);
+        this.setClickBoard();
         
     // если кликнули на ту же самую фишку - снимаем выделение
     }else if(this.selectedpiece.id() !== piece.id()){
         select(piece);
+        this.setClickBoard();
     }else{
         this.unselectPiece();
     }
@@ -516,7 +575,7 @@ Game.prototype.setClickBoard = function(){
     var self = this;
     
     if(this.selectedpiece !== false){
-    
+        
     this.board.mainlayer.on('click' , function(){
         if(self.selectedpiece !== false){
             var selectedpos = self.calcPiecePos(self.selectedpiece.id());
@@ -555,10 +614,11 @@ Game.prototype.setClickBoard = function(){
                 self.blockedPieces();
                 
                 // очищаем обработчик перемещения для новых расчетов
-                self.selectedpiece.off('dragend');
-                this.off('click');
+                //self.selectedpiece.off('dragend');
                 
-                self.activatePieces();
+                self.endDrag(piece);
+                
+                //self.activatePieces();
             }else{
                 self.setMessage("Невозможно сходить на данное поле");
                 setTimeout(function() {
@@ -568,7 +628,7 @@ Game.prototype.setClickBoard = function(){
         }
     });
     
-    } // if selectedpiece !== false;
+    }{console.log('not selected');} // if selectedpiece !== false;
 };
 
 /*
@@ -648,7 +708,7 @@ Game.prototype.getLastPieces = function(field , count){
     
     while(controll){
         if(pieces[pieces.length - counter] !== undefined){
-            result.push(pieces[pieces.length - counter]);
+            result.push(this.getPiece(pieces[pieces.length - counter]));
         }
         
         if(counter === count){controll = false;}
