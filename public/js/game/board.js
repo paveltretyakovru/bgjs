@@ -60,6 +60,30 @@ Board.prototype.calcLastFieldPos = function(fieldnum){
     }
 };
 
+Board.prototype.calcPosCoords = function(pos){
+    var field   = pos[0];
+    var index   = pos[1];
+    
+    if(this.checkCorrectFieldNum(field)){
+        // номер последней позиции в поле
+        
+        var lastnum = index;
+            
+        // field x
+        var fx  = this.fields[field].x;
+        var y   = 0;
+        
+        // определяем y
+        if(field < 13){
+            y = this.bottomy - lastnum * this.pieceheight;
+        }else{
+            y = this.topy + lastnum * this.pieceheight;
+        }
+        
+        return { x : fx , y : y };
+    }
+};
+
 /*
     #
     # fun checkCorrectFieldNum(int fieldnum) : bool

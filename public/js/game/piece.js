@@ -1,4 +1,5 @@
-var Piece = function(color , id , layer , stage , type , imageObjects){
+var Piece = function(color , id , layer , stage , type , imageObjects , game , board){
+    var self = this;
     var imagesrc = '';
     var controll = true;
     
@@ -16,6 +17,8 @@ var Piece = function(color , id , layer , stage , type , imageObjects){
         this.type   = type;
         this.id     = id;
         this.color  = color;
+        this.game   = game;
+        this.board  = board;
     }else{
         controll    = false;
         console.error('Один из параметров создания фишки равен undefined: ' , color , id , type);
@@ -62,6 +65,7 @@ var Piece = function(color , id , layer , stage , type , imageObjects){
         
         this.layer.add(pimageobj);
         this.stage.batchDraw();
+
     }else{
         console.error("При создании фишки произошла ошибка. Проверьте переданные аргументы");
     }
@@ -72,7 +76,7 @@ Piece.prototype.moveTo = function( x , y){
     
     var tween = new Kinetic.Tween({
 		node : self.obj ,
-		duration : 0.5 ,
+		duration : self.movetime ,
 		x : x ,
 		y : y
 	});
@@ -85,6 +89,7 @@ Piece.prototype.y       = 0;
 Piece.prototype.field   = 0;
 Piece.prototype.width   = 30;
 Piece.prototype.height  = 30;
+Piece.prototype.movetime= 0.5;
 
 Piece.prototype.id      = '';
 Piece.prototype.type    = '';
@@ -97,3 +102,6 @@ Piece.prototype.obj     = {};
 
 Piece.prototype.blackObj;
 Piece.prototype.whiteObj;
+Piece.prototype.game;
+Piece.prototype.board;
+Piece.prototype.nextp;
