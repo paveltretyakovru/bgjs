@@ -347,17 +347,6 @@ Game.prototype.activatePieces = function(){
         
         this.setDraggablePieces(pieces);
         
-        /*
-        // пробигаемся по этим фишкам и активируем
-        for(var i = 0; i < pieces.length; i++){
-            piece       = this.getPiece(pieces[i]);
-            piecepos    = this.calcPiecePos(pieces[i]);
-            
-            // активируем фишки, которыми ходили
-            this.setDraggable(piece.obj , piecepos[0]);
-        } 
-        */
-        
         // если игрок не отменил свой ход передаем ход
         setTimeout(function() {
                 if(self.lastStep()){
@@ -389,6 +378,8 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     if(pieceobj.last){
     
     node.on('click' , function(){
+        console.log('click :-)');
+        
         var node = this;
         if(timer) clearTimeout(timer);
         
@@ -442,9 +433,6 @@ Game.prototype.setDraggablePieces = function(pieces){
     // устанавливаем клики по доске
     this.setClickBoard();
     
-    console.log('pieces: ' , pieces);
-    
-    
     for(var i = 0; i < pieces.length; i++){
         
         field = this.calcPiecePos(pieces[i].id);
@@ -453,6 +441,8 @@ Game.prototype.setDraggablePieces = function(pieces){
         
         for(var n = 0; n < next[pieces[i].id].length; n++){
             if(next[pieces[i].id][n].id === pieces[i].id){
+                console.log('last true:' , next[pieces[i].id][n]);
+                next[pieces[i].id][n].last = true;
                 next[pieces[i].id].splice(n , 1);
             }
         }
@@ -525,9 +515,7 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     
     // если фишка возвращается на предыдущее поле
     if(movefield === oldfield){
-        console.error('movefield' , movefield);
         pos         = this.board.calcPosCoords(lastpos);
-        
     // если фишка передвигается в новое поле
     }else{
         // удаляем идентификатор фишки из предыдущей позиции
@@ -562,6 +550,8 @@ Game.prototype.endDrag = function(piece){
     }
     
     this.board.mainlayer.off('click');
+    
+    this.unselectPiece();
     
     // после завершения хода блокируем фишки, для новых расчетов
     this.blockedPieces();
@@ -897,8 +887,8 @@ Game.prototype.takeGameData = function(data){
             ){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                //this.step.bones = data.bones;
-                this.step.bones = [2 , 2];
+                this.step.bones = data.bones;
+                //this.step.bones = [2 , 2];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
