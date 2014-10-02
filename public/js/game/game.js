@@ -424,32 +424,40 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     }
 }
 
+/*
+    # Осноавная функция перебирающая фишки для их активации
+    # и создания дополнительных обработчиков
+*/
+
 Game.prototype.setDraggablePieces = function(pieces){
     var field;
     var self        = this;
-    var movelist    = [];
-    var next = {};
+    var next        = {};
     
     // устанавливаем клики по доске
     this.setClickBoard();
     
+    // перебираем фишки для активации
     for(var i = 0; i < pieces.length; i++){
         
+        // вычисляем поле, на котором расположена фишка
         field = this.calcPiecePos(pieces[i].id);
         field = field[0];
+        // вычисляем фишки, котороые расположены перед текущей
         next[pieces[i].id] = this.calcNextPieces(pieces[i].id);
         
+        // перебираем вычесленные фишки и удаляем id текущей
         for(var n = 0; n < next[pieces[i].id].length; n++){
             if(next[pieces[i].id][n].id === pieces[i].id){
-                console.log('last true:' , next[pieces[i].id][n]);
                 next[pieces[i].id][n].last = true;
                 next[pieces[i].id].splice(n , 1);
             }
         }
         
+        // обрабатываем событие, которая перемещает фишки
+        // которые расположены перед текущей, если перетягивать текущую
         pieces[i].obj.on('dragmove' , function(){
             var node = this;
-            
             if(next[node.id()] !== undefined){
                 for(var m = 0; m < next[node.id()].length; m++){
                     next[node.id()][m].obj.x( node.x() );
@@ -463,6 +471,12 @@ Game.prototype.setDraggablePieces = function(pieces){
     }
 };
 
+
+/*
+    # Основаня дополнительная функци яотвечающая за активацию
+    # дополнительного функционала для фишек
+    #
+*/
 Game.prototype.setDraggable = function(piece , oldfield , lastpiece){
     var self        = this;
     var pieceobj    = this.getPiece(piece.id());
@@ -473,6 +487,7 @@ Game.prototype.setDraggable = function(piece , oldfield , lastpiece){
     // делаем фишку перетаскиваемой
     piece.draggable(true);
     
+    // событие после отпускания фишки, после её перетягивания
     piece.on('dragend' , function(){
         var x = this.x();
         var y = this.y();

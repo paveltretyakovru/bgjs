@@ -71,6 +71,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         var can1        = false;
         var can2        = false;
         var can3        = false;
+        var can4        = false;
         var stepover    = false;
         
         if(this.steps[0][1] === 0){
@@ -123,6 +124,21 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             }
         }
         
+        // условие, что игрок после первого хода хочет сходить на сумму очков
+        if(
+            this.steps[0][1] !== 0 &&
+            this.steps[1][1] === 0 &&
+            this.steps[0][3] === pieceid){
+            result = this.handleRules(
+                    oldfield , this.steps[0][1] + this.steps[1][0]
+                );
+            
+            if(result){
+                can4 = this.steps[0][1] + this.steps[1][0];
+                console.log('can4' , can4);
+            }
+        }
+        
         // если новое поле является возможным то перетаскиваем на него
         if(can1 === newfield){ 
             this.steps[0][1] = newfield;
@@ -148,6 +164,13 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             this.steps[0][3] = pieceid;
             this.steps[1][3] = pieceid;
             return can3;
+        }
+        
+        if(can4 === newfield) {
+            this.steps[1][1] = newfield;
+            this.steps[1][2] = oldfield;
+            this.steps[1][3] = pieceid;
+            return can4;
         }
         
         
