@@ -29,6 +29,7 @@ Game.prototype.cancelStep   = 3000; // время на отмену хода
 Game.prototype.dblclicktime = 200;  // ожидание да двойной клик
 Game.prototype.ruletimemes  = 2000; // время на выведение сообщений системы правил
 
+Game.prototype.self         = {};
 Game.prototype.enemy        = {};
 
 Game.prototype.imageObjects = {};
@@ -371,19 +372,52 @@ Game.prototype.finishSteps = function(){
 Game.prototype.takeStep = function(data){
     console.log('получен шаг соперника' , data);
     
-    switch (sendstep) {
+    switch (this.sendstep) {
+        // если передается каждый ход по отдельности
         case 'every':
-            if('newfield'  in data &&
-                'pieceid'   in data &&
-                'steps'     in data     ){
+            // првереяем переданы ли все данные
+            if('newfield' in data && 'pieceid' in data && 'steps' in data){
+                // ищмем фишку
+                var piece = this.getPiece(data.pieceid);
+                
+                // вычисляем предыдущее положение фишки
+                var lastpos     = this.calcPiecePos(piece.id);
+                
+                // удаляем идентификатор фишки из предыдущей позиции
+                this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                
+                console.log(piece);
+                
+                var field = this.transformEnemyStep(data.newfield);
+                
+                // вычисляем последнюю позици на поле
+                var pos     = this.board.calcLastFieldPos(field);
+                
+                // перемещаем фишку
+                piece.moveTo(pos.x , pos.y);
+                
+                // перемещаем идентификатор фишки
+                this.moveIdPiece(field , data.pieceid);
                 
             }else{
-                
+                console.error('Переданы не все параметры для отображения хода');
             }
             break;
         
         default:
             console.error('Передан неизвестный тип передачи ходов')
+    }
+};
+
+/*
+    # Поулченное перемещение фишки, необходимо преобразовать на текущее поле
+    # т.к. у соперника поле отображается по другому
+*/
+Game.prototype.transformEnemyStep = function(field){
+    if(field > 0 && field < 13){
+        return 12 + field;
+    }else{
+        return field - 12;
     }
 };
 

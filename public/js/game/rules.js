@@ -69,6 +69,8 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     this.step.steps[i][2] = 0;
                     this.step.steps[i][3] = 0;
                     
+                    this.addSendStep([pieceid , result]);
+                    
                     // если найдено в истории, возвращаем значение предыдущего хода
                     // этой фишки
                     return result;
