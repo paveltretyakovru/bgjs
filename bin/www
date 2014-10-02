@@ -106,6 +106,17 @@ io.on('connection' , function(socket){
         sendRequestEvery('setBones' , game.bones);
     }); 
     
+    socket.on('transferStep' , function(data){
+        debug('transferStep' , data);
+        
+        // если у нас в массиве один объект, выносим его из массива
+        if(data.length === 1){
+            data = data[0];
+        }
+        
+        sendStep(data);
+    });
+    
     /*
         # Отключение пользователя 
         #
@@ -116,6 +127,10 @@ io.on('connection' , function(socket){
         players.deletePlayer(user.id);
         players.showList();
     });
+    
+    function sendStep(data){
+        enemy.socket.emit('takeStep' , data);
+    };
     
     function sendRequestEvery(name , data){
         if(name !== undefined && name !== ''){

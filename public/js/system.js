@@ -19,15 +19,20 @@ $(document).ready(function(){
     /*      ### Работа с сервером ###       */
     
     window.game.loadImages(function(){
-        // регистрируемся на сервере
-        window.game.registrOnServer({id : randomNumber(1 , 1000)});
-        
-        // инициализируем игровую доску
-        window.board.init();
-        
-        // получаем стартовые данные игры
-        window.game.setListener('takeGameData' , 'Game' , 'takeGameData');
+            // регистрируемся на сервере
+            window.game.registrOnServer({id : randomNumber(1 , 1000)});
+            
+            // инициализируем игровую доску
+            window.board.init();
+            
+            // получаем стартовые данные игры
+            window.game.setListener('takeGameData' , 'Game' , 'takeGameData');
+            
+            // получаем шакги от соперника
+            window.game.setListener('takeStep' , 'Game' , 'takeStep');
         });
+        
+        
     
     function randomNumber(min, max){
     	var rand = min - 0.5 + Math.random()*(max-min+1);

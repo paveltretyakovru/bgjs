@@ -21,6 +21,8 @@ Game.prototype.onepos       = true;     // фишки распалагаются
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
 Game.prototype.piececolor   = '';       // white || black
+Game.prototype.sendstep     = 'every';  // every || all - передавать шаги каждый/все
+
 // timers
 Game.prototype.timelot      = 3000; // общее время жеребьевки
 Game.prototype.cancelStep   = 3000; // время на отмену хода
@@ -32,11 +34,12 @@ Game.prototype.enemy        = {};
 Game.prototype.imageObjects = {};
 
 Game.prototype.step         = {
-    player  : '' ,      // self || enemy 
-    bones   : [] ,
-    side    : 'left' ,  // left || right
-    steps   : {} ,
-    points  : 0
+    player      : ''        ,   // self || enemy 
+    bones       : []        ,
+    side        : 'left'    ,   // left || right
+    steps       : []        ,
+    points      : 0         ,
+    send        : []            // массив для отправки хода сопернику
 };
 
 // global vars
@@ -293,7 +296,7 @@ Game.prototype.activatePieces = function(){
     // отправляем в прававой объект поля доски
     this.rules.setFields(this.board.fields);
     // отправляем объект шагов правовому объетку
-    this.rules.setSteps(this.step.steps);
+    this.rules.setSteps(this.step);
     
     // перебираем поля
     for(var field = 1; field < this.board.fields.length; field++){
@@ -363,6 +366,25 @@ Game.prototype.finishSteps = function(){
     this.setMessage('Передача хода');
     this.blockedPieces();
     
+};
+
+Game.prototype.takeStep = function(data){
+    console.log('получен шаг соперника' , data);
+    
+    switch (sendstep) {
+        case 'every':
+            if('newfield'  in data &&
+                'pieceid'   in data &&
+                'steps'     in data     ){
+                
+            }else{
+                
+            }
+            break;
+        
+        default:
+            console.error('Передан неизвестный тип передачи ходов')
+    }
 };
 
 
@@ -551,6 +573,8 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
 };
 
 Game.prototype.endDrag = function(piece){
+    // убираем ярлык, что фишка послдняя в ряду,
+    // для новых перерасчетов
     if(piece.last){
         piece.last = false;
     }
@@ -570,7 +594,38 @@ Game.prototype.endDrag = function(piece){
     
     // после завершения хода блокируем фишки, для новых расчетов
     this.blockedPieces();
+    
+    // передаем ход
+    this.giveStep();
+    
+    // пересчитываем и переактивируем новые фишки
     this.activatePieces();
+};
+
+/*
+    # Передача хода противнику
+*/
+Game.prototype.giveStep = function(){
+    switch(this.sendstep){
+        // если необходимо передавать каждый ход
+        case 'every':
+            // отрпавляем данные хода
+            if(this.step.send.length !== 0){
+                this.sendRequest('transferStep' , this.step.send);
+            }
+            
+            // очищаем данные хода
+            this.step.send = [];
+        break;
+        
+        // если необходимо передавать только конечные шаги
+        case 'all':
+        break;
+        
+        default:
+            console.error('Передана неизвестная метка для передачи хода');
+        break;
+    }
 };
 
 /*
@@ -902,8 +957,9 @@ Game.prototype.takeGameData = function(data){
             ){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                this.step.bones = data.bones;
+                //this.step.bones = data.bones;
                 //this.step.bones = [2 , 2];
+                this.step.bones = [2 , 3];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
