@@ -210,6 +210,7 @@ Game.prototype.setListener = function(name , obj , fun){
 };
 
 Game.prototype.sendRequest = function(name , data){
+    console.log('sendRequest' , name , data);
     this.socket.connection.emit(name , data);
 };
 
@@ -367,6 +368,15 @@ Game.prototype.finishSteps = function(){
     this.setMessage('Передача хода');
     this.blockedPieces();
     
+    this.step.player = 'enemy';
+    this.sendRequest('transferStepEnd' , true);
+};
+
+Game.prototype.stepBegin = function(data){
+    if(data){
+        this.step.player = 'self';
+        this.letsRock();
+    }
 };
 
 Game.prototype.takeStep = function(data){

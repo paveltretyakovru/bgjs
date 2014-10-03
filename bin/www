@@ -123,6 +123,12 @@ io.on('connection' , function(socket){
         games.sendEnemyData(user.id , 'takeStep' , data);
     });
     
+    socket.on('transferStepEnd' , function(data){
+        if(data){
+            games.sendEnemyData(user.id , 'stepBegin' , true);
+        }
+    });
+    
     /*
         # Отключение пользователя 
         #

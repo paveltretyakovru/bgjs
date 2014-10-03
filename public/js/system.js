@@ -30,6 +30,8 @@ $(document).ready(function(){
             
             // получаем шакги от соперника
             window.game.setListener('takeStep' , 'Game' , 'takeStep');
+            
+            window.game.setListener('stepBegin' , 'Game' , 'stepBegin');
         });
         
         
