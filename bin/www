@@ -119,13 +119,14 @@ io.on('connection' , function(socket){
         if(data.length === 1){
             data = data[0];
         }
-        
         games.sendEnemyData(user.id , 'takeStep' , data);
     });
     
     socket.on('transferStepEnd' , function(data){
         if(data){
-            games.sendEnemyData(user.id , 'stepBegin' , true);
+            game.generateBones();
+            games.sendEnemyData(user.id , 'stepBegin' , {bones : game.bones});
+            games.sendSelfData(user.id , 'takeBones' , {bones : game.bones});
         }
     });
     

@@ -96,8 +96,8 @@ Game.prototype.initPieces = function(pieces){
                             this.pieces[i].field  = 13;
                             
                             // распологаем белые слева
-                            this.enemy.side = 'left';
-                            this.side       = 'right';
+                            this.enemy.side = 'right';
+                            this.side       = 'left';
                             
                             this.startPiecesPositions(
                                 this.pieces[i].obj ,
@@ -299,6 +299,10 @@ Game.prototype.activatePieces = function(){
     this.rules.setFields(this.board.fields);
     // отправляем объект шагов правовому объетку
     this.rules.setSteps(this.step);
+    this.rules.setObjects({
+        game : this ,
+        board : this.board
+    });
     
     // перебираем поля
     for(var field = 1; field < this.board.fields.length; field++){
@@ -364,18 +368,51 @@ Game.prototype.activatePieces = function(){
 };
 
 Game.prototype.finishSteps = function(){
+    var self = this;
     console.info('Закончился ход');
     this.setMessage('Передача хода');
+    
+    setTimeout(function() {
+        self.setMessage('Ход соперника');
+    }, 1000);
+    
     this.blockedPieces();
     
+    // указываем, что сейчас ходит соперник
     this.step.player = 'enemy';
+    // меняем сторону хода
+    this.step.side   = (this.step.side === 'left') ? 'right' : 'left';
+    // отрпавляем указание сопернику начать ход
     this.sendRequest('transferStepEnd' , true);
 };
 
 Game.prototype.stepBegin = function(data){
-    if(data){
+    if('bones' in data){
+        console.log('stepBegin' , data);
+        // меняем значение костей
+        this.step.bones = data.bones;
+        // указываем, что наш ход
         this.step.player = 'self';
+        // меняем сторону хода
+        this.step.side   = (this.step.side === 'left') ? 'right' : 'left';
+        // перемещаем, взбалтываем и меняем значение костей
+        this.bones.animateStepBones(data.bones , this.side);
+        // начинаем ход
         this.letsRock();
+    }else{
+        console.error('Получен запрос stepBegin, но необходимый параметр отсутствует');
+    }
+};
+
+Game.prototype.takeBones = function(data){
+    if('bones' in data){
+        console.log('takeBones' , data);
+        // сохраняем занчение костей
+        this.step.bones = data.bones;
+        // перемещаем, взбалтываем и меняем значение костей
+        this.bones.animateStepBones(data.bones , this.enemy.side);
+    }else{
+        console.error('Получен запрос takeBones, но необходимый параметр отсутствует');
     }
 };
 
@@ -393,21 +430,26 @@ Game.prototype.takeStep = function(data){
                 // вычисляем предыдущее положение фишки
                 var lastpos     = this.calcPiecePos(piece.id);
                 
-                // удаляем идентификатор фишки из предыдущей позиции
-                this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                /* если поля совпадают не перемещаем фишку */
+                if(lastpos[0] !== data.newfield){
                 
-                console.log(piece);
+                    // удаляем идентификатор фишки из предыдущей позиции
+                    this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                    
+                    console.log(piece);
+                    
+                    var field = this.transformEnemyStep(data.newfield);
+                    
+                    // вычисляем последнюю позици на поле
+                    var pos     = this.board.calcLastFieldPos(field);
+                    
+                    // перемещаем фишку
+                    piece.moveTo(pos.x , pos.y);
+                    
+                    // перемещаем идентификатор фишки
+                    this.moveIdPiece(field , data.pieceid);
                 
-                var field = this.transformEnemyStep(data.newfield);
-                
-                // вычисляем последнюю позици на поле
-                var pos     = this.board.calcLastFieldPos(field);
-                
-                // перемещаем фишку
-                piece.moveTo(pos.x , pos.y);
-                
-                // перемещаем идентификатор фишки
-                this.moveIdPiece(field , data.pieceid);
+                }
                 
             }else{
                 console.error('Переданы не все параметры для отображения хода');
@@ -1001,9 +1043,9 @@ Game.prototype.takeGameData = function(data){
             ){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
-                //this.step.bones = data.bones;
+                this.step.bones = data.bones;
                 //this.step.bones = [2 , 2];
-                this.step.bones = [2 , 3];
+                //this.step.bones = [2 , 3];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
@@ -1057,17 +1099,24 @@ Game.prototype.moveBonesToNeed = function(){
     // если фишки должны всегда находиться в одном положении
     if(this.onepos){
         if(this.step.player === 'enemy'){
+            this.bones.moveToSide(2 , this.enemy.side);
+            
+            /*
             if(this.enemy.side === 'left'){
                 this.bones.moveToSide(2 , 'left');
             }else{
                 this.bones.moveToSide(2 , 'right');
             }
+            */
         }else{
+            this.bones.moveToSide(2 , this.side);
+            /*
             if(this.enemy.side === 'left'){
                 this.bones.moveToSide(2 , 'right');
             }else{
                 this.bones.moveToSide(2 , 'left');
             }
+            */
         }
     }
 };

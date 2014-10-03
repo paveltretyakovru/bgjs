@@ -32,6 +32,8 @@ $(document).ready(function(){
             window.game.setListener('takeStep' , 'Game' , 'takeStep');
             
             window.game.setListener('stepBegin' , 'Game' , 'stepBegin');
+            
+            window.game.setListener('takeBones' , 'Game' , 'takeBones');
         });
         
         

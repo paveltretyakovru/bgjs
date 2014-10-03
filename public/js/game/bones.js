@@ -8,6 +8,7 @@ Bones.prototype.vals        = [0 , 0];
 Bones.prototype.size        = 40;
 Bones.prototype.selector    = {};
 Bones.prototype.moveanimtime=1000; // время перемещения фишек
+Bones.prototype.shaketime   = 500;// время встярски костей
 
 /*
     # Функция возвращает параметры доски
@@ -77,4 +78,16 @@ Bones.prototype.shake = function(bone , timeAnim , boneval){
     
     selector.addClass("active").attr('data-value' , boneval);
     selector.effect('shake' , timeAnim);
+};
+
+Bones.prototype.animateStepBones = function(bones , side){
+    console.log('animateStepBones' , bones , side);
+    
+    var self = this;
+    this.moveToSide(2 , side);
+    
+    setTimeout(function(){
+        self.shake(0 , self.shaketime , bones[0]);
+        self.shake(1 , self.shaketime , bones[1]);
+    } , this.moveanimtime);
 };

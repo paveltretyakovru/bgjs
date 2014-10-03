@@ -28,6 +28,8 @@ Board.prototype.piececolor  = '';   // black || white
 Board.prototype.addPiece = function(pieceid , fieldnum){
     if(this.checkCorrectFieldNum(fieldnum)){
         this.fields[fieldnum].pieces.push(pieceid);
+    }else{
+        console.error('Ошибка с типом поля');
     }
 };
 
