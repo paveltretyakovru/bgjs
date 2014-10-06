@@ -6,7 +6,8 @@ Rules.prototype.fields  = [];
 Rules.prototype.game;
 Rules.prototype.board;
 Rules.prototype.prehouse = false;
-
+Rules.prototype.takehead = [];
+Rules.prototype.controllhead = true;
 // необходимые функции для проверки возможности хода
 Rules.prototype.rules = [
         'haveEnemy' // проверка на содержание фишек противника на поле
@@ -110,12 +111,123 @@ Rules.prototype.prehouseRules = function(oldfield , newfield , boneval){
         }
         return true;
     }
-}
+};
+
+/*
+    # Правило взятия с головы
+*/
+Rules.prototype.headRules = function(oldfield , pieceid){
+    if(oldfield !== 1) return true;
+    
+    var bone1   = this.step.steps[0][0];
+    var bone2   = this.step.steps[1][0];
+    var two     = false;
+    
+    var steps = (bone1 === bone2) ? 4 : 2;
+    
+    // исключение первого хода
+    if(steps === 4){
+        if(this.game.countsteps === 0){
+            if(bone1 === 6 || bone1 === 4 || bone1 === 3){
+                two = true;
+            }
+        }
+    }
+    
+    // если не взято еще ни одной фишки с головы
+    if(this.takehead.length === 0){
+        this.takehead.push(pieceid);
+        return true;
+    // если уже выделена одна фишка в голове
+    }else if(this.takehead.length === 1){
+        // если можно взять 2 фишки
+        if(two){
+            // если фишка не сохранена
+            if(this.takehead.indexOf(pieceid) === -1){
+                // сохраняем её
+                this.takehead.push(pieceid);
+                return true;
+            }else{
+                // если фишка уже добавлена в голову
+                return true;
+            }
+        }else{
+            // если можно взять одну фишку
+            // смотрим, добавлена ли она
+            if(this.takehead.indexOf(pieceid) !== -1){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+    
+};
+
+Rules.prototype.blockRule = function(oldfield , newfield){
+    var controll        = 0;
+    var backcontroll    = 0;
+    
+    var tmpcontroll = true;
+    
+    if(newfield >= 1 && newfield <= 12){
+        for(var i = newfield; i <= 12; i++){
+            if(this.haveEnemy(i)){
+                console.log('blockRule : haveEnemy');
+                return true;
+            }else if(this.game.myField(i)){
+                if(this.game.board.fields[i].pieces.length === 0){
+                    console.log('blockRule : empty field');
+                    tmpcontroll = false;
+                    break;
+                }else{
+                    if(tmpcontroll)controll++;
+                }
+                
+            }
+            
+            if(controll === 6){
+                console.log('blockrule === 6')
+                return false;
+            }
+        }
+        tmpcontroll = true;
+        for(var i = newfield; i >= 1; i--){
+            if(this.game.myField(i)){
+                if(this.game.board.fields[i].pieces.length === 0){
+                    tmpcontroll = false;
+                    break;
+                }else{
+                    if(tmpcontroll) backcontroll++;
+                }
+            }
+        }
+    }
+    
+    if(backcontroll + 1 >= 6){
+        console.log('backcontroll + 1' , backcontroll + 1);
+        return false;
+    }
+    
+    if(backcontroll + controll >= 6){
+        console.log('backcontroll + controll' , backcontroll + controll);
+        return false;
+    }
+    
+    if(controll + 1 >= 6){
+        console.log('controll + 1' , controll + 1);
+        return false;
+    }
+    
+    return true;
+};
+
 
 /*
     # Функция перебирает правила хода и проверяет может ли сходить
 */
 Rules.prototype.handleRules = function(oldfield , newfield , boneval){
+    
     // правило проверяет есть ли на поле фишки соперника,
     // возвращает разрешение.
     if(this.haveEnemy(newfield)){
@@ -132,9 +244,15 @@ Rules.prototype.handleRules = function(oldfield , newfield , boneval){
             // если фишка идет в дом не выполнив условия перевода всех фишек
             // в последнее поле
             if(newfield >= 1 && newfield <= 6 && oldfield >= 19){
+                console.error('Следующий ход в дом. Пока нельзя' , oldfield);
                 return false;
             }else{
-                return true;
+                if(this.blockRule(oldfield , newfield)){
+                    return true;
+                }else{
+                    console.log('BLOCK RULE вернул лож!!!!');
+                    return false;
+                }
             }
             
         }
@@ -171,6 +289,10 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                 if(this.step.steps[i][3] === pieceid){
                     result = this.step.steps[i][2];
                     
+                    // если фишка возвращается в голову даем разрешение на перемещение головы
+                    if(this.step.steps[i][2] === 1){
+                        this.controllhead = true;
+                    }
                     // стираем значение текущей ичейки очка
                     this.step.steps[i][1] = 0;
                     this.step.steps[i][2] = 0;
@@ -550,6 +672,11 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
     
     // если ничего не дало результата, возвращаем прежнюю позицию
     console.log('return here' , oldfield);
+    
+    if(oldfield === 1){
+        this.controllhead = true;
+    }
+    
     return oldfield;
 };
 
@@ -564,6 +691,14 @@ Rules.prototype.canMove = function ( field ) {
     field = (field < 1)  ? 1  : field;
     
     var result = false;
+    
+    // если с головы уже взяли фишки, поле непередвигаемое
+    if(field === 1){
+        if(!this.controllhead){
+            console.error('С головы уже взяли');
+            return false;
+        }
+    }
     
     if(this.step.steps.length === 2){
         // может ли сходить на первую кость
@@ -584,6 +719,13 @@ Rules.prototype.canMove = function ( field ) {
         }
         
         if (result){return true;}
+        
+        if(this.step.steps[0][1] !== 0 && this.step.steps[1][1] === 0){
+            boneval = this.step.steps[1][0];
+            result = this.handleRules(field , this.checkFieldNum(this.step.steps[0][2] + this.step.steps[1][0]) , boneval);
+        }
+        
+        if(result){return true;}
         
         // может ли сходить на сумму костей
         if(this.step.steps[1][1] === 0 && this.step.steps[0][1] === 0){
@@ -613,6 +755,7 @@ Rules.prototype.canMove = function ( field ) {
                 this.checkFieldNum(field + this.step.steps[0][0] * i) ,
                 this.step.steps[0][0] * i
             );
+            if(!result){return false;}
             if(result){return true;}
         }
         

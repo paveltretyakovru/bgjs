@@ -2,7 +2,7 @@ var Bones = function(selector){
     this.selector = $(selector);
 };
 
-Bones.prototype.elements    = ['#die1' , '#die2'];
+Bones.prototype.elements    = ['#die1' , '#die2' , '#die3' , '#die4'];
 Bones.prototype.board       = '#container';
 Bones.prototype.vals        = [0 , 0];
 Bones.prototype.size        = 40;
@@ -48,6 +48,11 @@ Bones.prototype.changeSide = function(bone , side){
     if(side === 'right'){$(this.elements[bone]).offset({top : board.half , left : board.rightpart});}
 };
 
+Bones.prototype.hideDop = function(){
+    $(this.elements[2]).css('visibility' , 'hidden');
+    $(this.elements[3]).css('visibility' , 'hidden');
+};
+
 /*
     # Функция анимированно перемещает указнные фишки в 
     # нужную часть
@@ -61,12 +66,41 @@ Bones.prototype.moveToSide = function(bone , side){
         case 2:
             // перемещение в лево
             if(side === 'left'){
+                $(this.elements[2]).css('visibility' , 'hidden');
+                $(this.elements[3]).css('visibility' , 'hidden');
+                
                 $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
                 $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
             // перемещение вправо
             }else if(side === 'right'){
                 $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
                 $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
+            }else{console.error('Неверное значение для перемещения фишек');}
+        break;
+        
+        case 4:
+            // перемещение в лево
+            if(side === 'left'){
+                $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
+                
+                $(this.elements[2]).css('visibility' , 'visible');
+                $(this.elements[2]).animate({left:board.leftpart - 40} , this.moveanimtime);
+                
+                $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
+                
+                $(this.elements[3]).css('visibility' , 'visible');
+                $(this.elements[3]).animate({left:board.leftpart + 40} , this.moveanimtime);
+            // перемещение вправо
+            }else if(side === 'right'){
+                $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
+                
+                $(this.elements[2]).css('visibility' , 'visible');
+                $(this.elements[2]).animate({left:board.rightpart - 40} , this.moveanimtime);
+                
+                $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
+                
+                $(this.elements[3]).css('visibility' , 'visible');
+                $(this.elements[3]).animate({left:board.rightpart + 40} , this.moveanimtime);
             }else{console.error('Неверное значение для перемещения фишек');}
         break;
     }
@@ -84,10 +118,111 @@ Bones.prototype.animateStepBones = function(bones , side){
     console.log('animateStepBones' , bones , side);
     
     var self = this;
-    this.moveToSide(2 , side);
+    
+    if(bones[0] === bones[1]){
+        this.moveToSide(4 , side);    
+    }else{
+        this.moveToSide(2 , side);
+    }
+    
+    
     
     setTimeout(function(){
-        self.shake(0 , self.shaketime , bones[0]);
-        self.shake(1 , self.shaketime , bones[1]);
+        if(bones[0] === bones[1]){
+            self.shake(0 , self.shaketime , bones[1]);
+            self.shake(1 , self.shaketime , bones[1]);
+            self.shake(2 , self.shaketime , bones[1]);
+            self.shake(3 , self.shaketime , bones[1]);
+        }else{
+            self.shake(0 , self.shaketime , bones[0]);
+            self.shake(1 , self.shaketime , bones[1]);
+        }
     } , this.moveanimtime);
+};
+
+Bones.prototype.lightControll = function (steps , active){
+    if(steps.length === 2){
+        if(!active){
+        
+            var elem1 = $(this.elements[0]).attr('data-value');
+            var elem2 = $(this.elements[1]).attr('data-value');
+            
+            if(steps[0][1] === 0){
+                if(steps[0][0] + '' === elem1){
+                    $(this.elements[0]).css('opacity' , 1);
+                }
+                
+                if(steps[0][0] + '' === elem2){
+                    $(this.elements[1]).css('opacity' , 1);
+                }
+                
+            }else{
+                
+                if(steps[0][0] + '' === elem1){
+                    $(this.elements[0]).css('opacity' , 0.5);
+                }
+                
+                if(steps[0][0] + '' === elem2){
+                    $(this.elements[1]).css('opacity' , 0.5);
+                }
+            }
+            
+            
+            
+            if(steps[1][1] === 0){
+                if(steps[1][0] + '' === elem1){
+                    $(this.elements[0]).css('opacity' , 1);
+                }
+                
+                if(steps[1][0] + '' === elem2){
+                    $(this.elements[1]).css('opacity' , 1);
+                }
+                
+            }else{
+                
+                if(steps[1][0] + '' === elem1){
+                    $(this.elements[0]).css('opacity' , 0.5);
+                }
+                
+                if(steps[1][0] + '' === elem2){
+                    $(this.elements[1]).css('opacity' , 0.5);
+                }
+            }
+        }else{
+            $(this.elements[0]).css('opacity' , 1);
+            $(this.elements[1]).css('opacity' , 1);
+        }
+        
+    }else if(steps.length === 4){
+        if(active){
+            $(this.elements[0]).css('opacity' , 1);
+            $(this.elements[1]).css('opacity' , 1);
+            $(this.elements[2]).css('opacity' , 1);
+            $(this.elements[3]).css('opacity' , 1);
+        }else{
+            if(steps[0][1] === 0){
+                $(this.elements[3]).css('opacity' , 1);
+            }else{
+                $(this.elements[3]).css('opacity' , 0.5);
+            }
+            
+            if(steps[1][1] === 0){
+                $(this.elements[2]).css('opacity' , 1);
+            }else{
+                $(this.elements[2]).css('opacity' , 0.5);
+            }
+            
+            if(steps[2][1] === 0){
+                $(this.elements[1]).css('opacity' , 1);
+            }else{
+                $(this.elements[1]).css('opacity' , 0.5);
+            }
+            
+            if(steps[3][1] === 0){
+                $(this.elements[0]).css('opacity' , 1);
+            }else{
+                $(this.elements[0]).css('opacity' , 0.5);
+            }
+        }
+    }
 };

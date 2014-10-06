@@ -27,7 +27,12 @@ div.die{
 	-webkit-opacity:0.5;
 	-moz-opacity:0.5;
 	opacity:0.5;
+	visibility: hidden;
 }
+
+#die3 {width: 40px; height: 40px; top:400px;}
+#die4 {width: 40px; height: 40px; top:400px;}
+
 	div.die.active{-webkit-opacity:1;-moz-opacity:1;opacity:1;}
 	div.die#die1{left:50%;}
 	div.die#die2{left:58%;}
@@ -43,6 +48,8 @@ div.die{
 	div.die div.face div.pip.top{top:7.5px;}
 	div.die div.face div.pip.middle{top:20px;}
 	div.die div.face div.pip.bottom{bottom:7.5px;}
+	
+	#die3 .pip , #die4 .pip{width: 5px; height: 5px;}
 
 /* .dice {
     float: left;
