@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamemessage';
-Game.prototype.type         = 'long';   // тип игры
+Game.prototype.type         = 'long';   // тип игры | long || prehouse
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -29,9 +29,10 @@ Game.prototype.cancelStep   = 3000; // время на отмену хода
 Game.prototype.dblclicktime = 200;  // ожидание да двойной клик
 Game.prototype.ruletimemes  = 2000; // время на выведение сообщений системы правил
 
+Game.prototype.countsteps   = 0;
+
 Game.prototype.self         = {};
 Game.prototype.enemy        = {};
-
 Game.prototype.imageObjects = {};
 
 Game.prototype.step         = {
@@ -64,6 +65,7 @@ Game.prototype.setMessage = function(message){
 Game.prototype.initPieces = function(pieces){
     
     this.pieces = [];
+    var pieceid;
     
     switch(this.type){
         /*  
@@ -74,7 +76,7 @@ Game.prototype.initPieces = function(pieces){
         
         case 'long':
             for(var i = 0; i < 30; i++){
-                var pieceid = pieces[i];
+                pieceid = pieces[i];
                 if (i < 15){
                     // создаем объекты фишек
                     
@@ -155,6 +157,105 @@ Game.prototype.initPieces = function(pieces){
                 }
             }
             break;
+        
+        case 'prehouse':
+            var self = this;
+            
+            function setPiece(num , field , i , self){
+                for(var n = 0 ; n < num.length; n++){
+                    if(i === num[n]){
+                        self.pieces[i].field  = field;
+                        // распологаем белые слева
+                        self.enemy.side = 'right';
+                        self.side       = 'left';
+                                
+                        self.startPiecesPositions(self.pieces[i].obj,field,self.pieces[i]);
+                    }   
+                }
+            }
+            
+            // Расположение фишек для тестирования перевода фишек в дом
+            
+            /* ################## */
+            
+            for(var i = 0; i < 30; i++){
+                pieceid = pieces[i];
+                if (i < 15){
+                    // создаем объекты фишек
+                    
+                    this.pieces[i] = new Piece(
+                                                'white' ,
+                                                pieceid ,
+                                                this.board.mainlayer ,
+                                                this.board.stage ,
+                                                'left' ,
+                                                this.imageObjects ,
+                                                this ,
+                                                this.board
+                                            );
+
+                    // если фишки должны всегда находиться в одном положении
+                    if(this.onepos){
+                        // если соперник выиграл
+                        if(this.step.player === 'enemy'){
+                            setPiece([0] , 6 , i , self);
+                            setPiece([1] , 7 , i , self);
+                            setPiece([2 , 3] , 8 , i , self);
+                            setPiece([4 , 5 , 6] , 9 , i , self);
+                            setPiece([7 , 8 , 9] , 10 , i , self);
+                            setPiece([10 , 11 , 12] , 11 , i , self);
+                            setPiece([13 , 14] , 12 , i , self);
+                        }else{
+                            setPiece([0] , 18 , i , self);
+                            setPiece([1] , 19 , i , self);
+                            setPiece([2 , 3] , 20 , i , self);
+                            setPiece([4 , 5 , 6] , 21 , i , self);
+                            setPiece([7 , 8 , 9] , 22 , i , self);
+                            setPiece([10 , 11 , 12] , 23 , i , self);
+                            setPiece([13 , 14] , 24 , i , self);
+                        }
+                    }
+                }else{
+                    this.pieces[i] = new Piece(
+                            'black' ,
+                            pieceid ,
+                            this.board.mainlayer ,
+                            this.board.stage ,
+                            'right' ,
+                            this.imageObjects ,
+                            this ,
+                            this.board
+                        );
+                    
+                    // если фишки должны всегда находиться в одном положении
+                    if(this.onepos){
+                        // если соперник выиграл
+                        if(this.step.player === 'enemy'){
+                            setPiece([15] , 18 , i , self);
+                            setPiece([16] , 19 , i , self);
+                            setPiece([17 , 18] , 20 , i , self);
+                            setPiece([19 , 20 , 21] , 21 , i , self);
+                            setPiece([22 , 23 , 24] , 22 , i , self);
+                            setPiece([25 , 26 , 27] , 23 , i , self);
+                            setPiece([28 , 29] , 24 , i , self);
+                        }else{
+                            setPiece([15] , 6 , i , self);
+                            setPiece([16] , 7 , i , self);
+                            setPiece([17 , 18] , 8 , i , self);
+                            setPiece([19 , 20 , 21] , 9 , i , self);
+                            setPiece([22 , 23 , 24] , 10 , i , self);
+                            setPiece([25 , 26 , 27] , 11 , i , self);
+                            setPiece([28 , 29] , 12 , i , self);
+                        }
+                    }
+                }
+            }
+            
+            /* ###################### */
+            
+            
+            break;
+        
         default : console.error("Передан неизвестный тип игры");
     }
 }
@@ -359,6 +460,8 @@ Game.prototype.activatePieces = function(){
         // если игрок не отменил свой ход передаем ход
         setTimeout(function() {
                 if(self.lastStep()){
+                    // увеличиваем количество ходов
+                    self.countsteps++;
                     self.finishSteps();
                 }else{
                     self.setMessage("Ход отменен");
@@ -439,6 +542,11 @@ Game.prototype.takeStep = function(data){
                     console.log(piece);
                     
                     var field = this.transformEnemyStep(data.newfield);
+                    
+                    // если фишку переводят в дом
+                    if(data.prehouse && field >= 13 && field <= 18){
+                        field = 13;
+                    }
                     
                     // вычисляем последнюю позици на поле
                     var pos     = this.board.calcLastFieldPos(field);
@@ -569,7 +677,14 @@ Game.prototype.setDraggablePieces = function(pieces){
             if(next[node.id()] !== undefined){
                 for(var m = 0; m < next[node.id()].length; m++){
                     next[node.id()][m].obj.x( node.x() );
-                    next[node.id()][m].obj.y( node.y() - self.board.pieceheight * (m + 1));
+                    if(field > 12){
+                        // если фишки перетягиваются наверху
+                        next[node.id()][m].obj.y( node.y() + self.board.pieceheight * (m + 1));
+                    }else{
+                        // фишки перетягиваются внизу
+                        next[node.id()][m].obj.y( node.y() - self.board.pieceheight * (m + 1));
+                    }
+                    
                 }
             }
             
@@ -633,6 +748,13 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
         
     // вычисляем поле, на которое может сходить фишка
     var movefield   = this.rules.calcMove(oldfield , newfield , piece.id);
+    
+    // если фишку перещаем в дом
+    if(this.rules.prehouse){
+        if(movefield >= 1 && movefield <= 6){
+            movefield = 1;
+        }
+    }
     
     var lastpos     = this.calcPiecePos(piece.id);
     
@@ -786,6 +908,13 @@ Game.prototype.setClickBoard = function(){
                 var lastpos     = self.calcPiecePos(self.selectedpiece.id());
                 self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
                 
+                // если фишку перемещаем в дом
+                if(self.rules.prehouse){
+                    if(movefield >= 1 && movefield <= 6){
+                        movefield = 1;
+                    }
+                }
+                
                 // вычисляем координаты поля на которое можно сходить
                 var pos         = self.board.calcLastFieldPos(movefield);
                 
@@ -794,6 +923,8 @@ Game.prototype.setClickBoard = function(){
                 
                 // перемещаем фишку
                 piece.moveTo(pos.x , pos.y);
+                
+                piece.field = movefield;
                 
                 // после завершения хода блокируем фишки, для новых расчетов
                 self.blockedPieces();
@@ -999,6 +1130,15 @@ Game.prototype.calcPoints = function(){
     
     // колчество возможных шагов
     var steps = (bone1 === bone2) ? 4 : 2;
+    
+    // исключение первого хода
+    if(steps === 4){
+        if(this.countsteps === 0){
+            if(bone1 === 6 || bone1 === 4 || bone1 === 3){
+                steps = 2;
+            }
+        }
+    }
     
     var st = [];
     

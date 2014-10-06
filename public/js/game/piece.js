@@ -87,8 +87,8 @@ Piece.prototype.moveTo = function( x , y){
 Piece.prototype.x       = 0;
 Piece.prototype.y       = 0;
 Piece.prototype.field   = 0;
-Piece.prototype.width   = 30;
-Piece.prototype.height  = 30;
+Piece.prototype.width   = 34;
+Piece.prototype.height  = 34;
 Piece.prototype.movetime= 0.5;
 
 Piece.prototype.id      = '';

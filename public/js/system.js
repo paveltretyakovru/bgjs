@@ -31,8 +31,10 @@ $(document).ready(function(){
             // получаем шакги от соперника
             window.game.setListener('takeStep' , 'Game' , 'takeStep');
             
+            // получаем указание начать ход
             window.game.setListener('stepBegin' , 'Game' , 'stepBegin');
             
+            // получаем указания болтать кости
             window.game.setListener('takeBones' , 'Game' , 'takeBones');
         });
         

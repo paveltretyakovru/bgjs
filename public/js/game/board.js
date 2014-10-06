@@ -14,8 +14,8 @@ Board.prototype.image       = '../images/tables/2dboard.png';
 Board.prototype.htmlid      = 'container';
 Board.prototype.imagex      = 0;
 Board.prototype.imagey      = 0;
-Board.prototype.pieceheight = 30;
-Board.prototype.topy        = 30;
+Board.prototype.pieceheight = 34;
+Board.prototype.topy        = 28;
 Board.prototype.bottomy     = 540;
 
 /* empty values */
@@ -219,8 +219,8 @@ Board.prototype.fields = [
 	{x : 326 , pieces : [] } 	,	// 18
 	{x : 244 , pieces : [] } 	,	// 19
 	{x : 201 , pieces : [] } 	,	// 20
-	{x : 158 , pieces : [] } 	,	// 21
+	{x : 156 , pieces : [] } 	,	// 21
 	{x : 115 , pieces : [] } 	,	// 22
-	{x : 71  , pieces : [] } 	,	// 23
-	{x : 27  , pieces : [] } 		// 24
+	{x : 68  , pieces : [] } 	,	// 23
+	{x : 26  , pieces : [] } 		// 24
 ];
