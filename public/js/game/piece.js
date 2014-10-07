@@ -99,6 +99,7 @@ Piece.prototype.last    = false;
 Piece.prototype.layer   = {};
 Piece.prototype.stage   = {};
 Piece.prototype.obj     = {};
+Piece.prototype.oldpos  = {};
 
 Piece.prototype.blackObj;
 Piece.prototype.whiteObj;

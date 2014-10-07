@@ -78,7 +78,6 @@ Rules.prototype.checkPrehouse = function(){
 */
 Rules.prototype.haveEnemy = function(newfield){
     // если поле пустое, разрешаем перемещение
-    console.log('haveEnemy' , newfield);
     if(this.board.fields[newfield].pieces.length === 0) return true;
     
     // если поле не пустое, проверяем является ли поле игрока
@@ -127,7 +126,7 @@ Rules.prototype.headRules = function(oldfield , pieceid){
     
     // исключение первого хода
     if(steps === 4){
-        if(this.game.countsteps === 0){
+        if(this.game.countsteps === 0 || this.game.countsteps === 1){
             if(bone1 === 6 || bone1 === 4 || bone1 === 3){
                 two = true;
             }
@@ -160,6 +159,12 @@ Rules.prototype.headRules = function(oldfield , pieceid){
                 return false;
             }
         }
+    }else if(this.takehead.length === 2){
+        if(this.takehead.indexOf(pieceid) !== -1){
+            return true;
+        }else{
+            return false;
+        }
     }
     
 };
@@ -173,11 +178,9 @@ Rules.prototype.blockRule = function(oldfield , newfield){
     if(newfield >= 1 && newfield <= 12){
         for(var i = newfield; i <= 12; i++){
             if(this.haveEnemy(i)){
-                console.log('blockRule : haveEnemy');
                 return true;
             }else if(this.game.myField(i)){
                 if(this.game.board.fields[i].pieces.length === 0){
-                    console.log('blockRule : empty field');
                     tmpcontroll = false;
                     break;
                 }else{
@@ -187,7 +190,6 @@ Rules.prototype.blockRule = function(oldfield , newfield){
             }
             
             if(controll === 6){
-                console.log('blockrule === 6')
                 return false;
             }
         }
@@ -231,8 +233,6 @@ Rules.prototype.handleRules = function(oldfield , newfield , boneval){
     // правило проверяет есть ли на поле фишки соперника,
     // возвращает разрешение.
     if(this.haveEnemy(newfield)){
-        console.log('haveEnemy вернула правду');
-        
         // проверка, если начался вывод в дом
         if(this.checkPrehouse()){
             if(this.prehouseRules(oldfield , newfield , boneval)){
@@ -250,7 +250,6 @@ Rules.prototype.handleRules = function(oldfield , newfield , boneval){
                 if(this.blockRule(oldfield , newfield)){
                     return true;
                 }else{
-                    console.log('BLOCK RULE вернул лож!!!!');
                     return false;
                 }
             }
@@ -259,7 +258,6 @@ Rules.prototype.handleRules = function(oldfield , newfield , boneval){
         
         
     }else{
-        console.log('haveEnemy вернула лож!!!!');
         return false;
     }
 };
@@ -275,9 +273,6 @@ Rules.prototype.checkFieldNum = function(field){
 Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
     
     var result = oldfield;
-    
-    console.log('newfield: ' , newfield);
-    
     /*
         # Игрок передвигает фишку назад
     */
@@ -302,7 +297,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     
                     // если найдено в истории, возвращаем значение предыдущего хода
                     // этой фишки
-                    console.log('return here');
                     return result;
                 }
             }
@@ -359,11 +353,15 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                 /*
                     # Либо делаем ход на вторую кость классически :-)
                 */
+                
+                console.log('step2 classic');
+                
                 boneval = this.step.steps[1][0];
                 num2 = this.checkFieldNum(this.step.steps[1][0] + oldfield);
                 
                 result = this.handleRules(oldfield , num2 , boneval);
                 if(result){
+                    console.log('step2 classic result ' , num2 , newfield);
                     can2 = num2;
                 }
             }
@@ -415,6 +413,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             this.addSendStep([pieceid , can1]);
             
             console.log('return here');
+            
             return can1;
         }
         if(
@@ -429,8 +428,23 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                 this.addSendStep([pieceid , can2]);
                 
                 console.log('return here');
+                
                 return can2;
         }
+        
+        // если фишка переведена сразу на значение второй кости
+        if(can2 === newfield && this.step.steps[0][1] === 0){
+            this.step.steps[1][1] = newfield;
+            this.step.steps[1][2] = oldfield;    // сохраняем предыдущее поле
+            this.step.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
+            
+            this.addSendStep([pieceid , can2]);
+            
+            console.log('return here');
+            
+            return can2;
+        }
+        
         if(can3 === newfield) {
             this.step.steps[0][1] = newfield;
             this.step.steps[1][1] = newfield;
@@ -446,6 +460,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             this.addSendStep([pieceid , can3]);
             
             console.log('return here');
+            
             return can3;
         }
         
@@ -457,13 +472,14 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             this.addSendStep([pieceid , can4]);
             
             console.log('return here');
+            
             return can4;
         }
         
         // если к функции идет обращение через клик на доску
         
-        if(clickboard !== undefined){ 
-            console.log('return here');
+        if(clickboard !== undefined){
+            console.log('clickboard click.' , newfield , can1 , can2 , can3 , can4);
             return false;
         }
         
@@ -494,7 +510,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can2]);
             
-            console.log('return here');
             return can2;
         };
         if(can3) {
@@ -509,7 +524,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can3]);
             
-            console.log('return here');
             return can3
         };
     }
@@ -535,7 +549,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         
         // если нет свободных слотов в шагах
         if(free === 0) {
-            console.log('return here');
             return oldfield;
         };
         
@@ -572,7 +585,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     }
                     
                     this.addSendStep([pieceid , this.checkFieldNum(newfield)]);
-                    console.log('return here' , newfield);
                     return newfield;
                 }
                 
@@ -585,7 +597,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         console.log('controll clickboard' , clickboard);
         
         if(clickboard !== undefined){
-            console.log('return here');
             return false;
         }
         
@@ -604,7 +615,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             }
             
             if(countsteps === free){
-                console.log('return here');
                 return false;
             }
         }
@@ -622,57 +632,15 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             // сохраняем идентификатор фихи
             this.step.steps[elemfree][3] = pieceid;
             
-            console.log('return here');
-            
             this.addSendStep([pieceid , can5]);
             return can5;
         }else{
-            console.log('return here');
             return oldfield;
         }
-        
-        /*
-        while(controll){
-            
-            // проверяем минимальный возможный ход
-            if(this.handleRules(oldfield , oldfield + points * freecounter)){
-                // ищем неотхоженную ячейку
-                for(var i = 0; i < freecounter; i++){
-                    elemfree = findFree(free , this.step.steps);
-                    
-                    if(elemfree !== false && elemfree !== undefined){
-                        // забиваем ее значение номером новго поля
-                        this.step.steps[elemfree][1] = oldfield + points * freecounter;
-                        // сохраняем прежнюю позицию
-                        this.step.steps[elemfree][2] = oldfield;
-                        // сохраняем идентификатор фихи
-                        this.step.steps[elemfree][3] = pieceid;
-                    }else{
-                        return oldfield;
-                    }
-                }
-                
-                this.addSendStep([pieceid , oldfield + points * freecounter]);
-                
-                // возвращаем ближайшее свободное поле
-                return oldfield + points * freecounter;
-                
-                controll = false;
-            }
-            
-            if(freecounter === free){controll = false;}
-            
-            freecounter++;
-        }
-        */
-
-    
     } // steps.length === 4
     
     
     // если ничего не дало результата, возвращаем прежнюю позицию
-    console.log('return here' , oldfield);
-    
     if(oldfield === 1){
         this.controllhead = true;
     }
@@ -695,7 +663,6 @@ Rules.prototype.canMove = function ( field ) {
     // если с головы уже взяли фишки, поле непередвигаемое
     if(field === 1){
         if(!this.controllhead){
-            console.error('С головы уже взяли');
             return false;
         }
     }

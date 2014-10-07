@@ -337,6 +337,15 @@ Game.prototype.letsRock = function(){
     // Чей сейчас ход (self  || enemy)
     var player = this.step.player;
     
+    // устанавливаем демо фишки
+    if(this.piececolor === 'white'){
+        $('#home1pl').html('Вы <img src="images/pieces/white.png" />');
+        $('#home2pl').html('Соперник <img src="images/pieces/black.png" />');
+    }else{
+        $('#home1pl').html('Вы <img src="images/pieces/black.png" />');
+        $('#home2pl').html('Соперник <img src="images/pieces/white.png" />');
+    }
+    
     // Выводим сообщение
     if(player === 'enemy'){
         this.setMessage('Ход противника');
@@ -654,22 +663,26 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     
     // если фишка последняя в ряду, то ее можно выделять
     if(pieceobj.last){
+        console.log('set click last piece');
     
     node.on('click' , function(){
-        console.log('click :-)');
-        
-        var node = this;
-        if(timer) clearTimeout(timer);
-        
-        timer = setTimeout(function() {
+        console.log('CONSOLE LOOOOG!');
+        if(!this.indrag){
+            console.log('CLICED! :-)');
+            var node = this;
+            if(timer) clearTimeout(timer);
             
-            self.selectPiece(node);
-            
-        }, self.dblclicktime);
+            timer = setTimeout(function() {
+                console.log('click :-)');
+                self.selectPiece(node);
+                
+            }, self.dblclicktime);
+        }
     });
     
     // двойной клик по фишке перемещает фишку на минимальное значение
     node.on('dblclick' , function(){
+        console.log('dableclick');
         var node = this;
         
         clearTimeout(timer);
@@ -705,7 +718,7 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     });
     
     }
-}
+};
 
 /*
     # Осноавная функция перебирающая фишки для их активации
@@ -773,30 +786,41 @@ Game.prototype.setDraggablePieces = function(pieces){
     # дополнительного функционала для фишек
     #
 */
-Game.prototype.setDraggable = function(piece , oldfield , lastpiece){
+Game.prototype.setDraggable = function(piece , oldfield){
     var self        = this;
     var pieceobj    = this.getPiece(piece.id());
-    
-    // устанавливаем клики по фишке
-    this.setClicksPiece(piece , oldfield);
-    
     // делаем фишку перетаскиваемой
     piece.draggable(true);
     
+    piece.on('dragstart' , function(){
+            pieceobj.oldpos = {x : this.x() , y : this.y()};
+    });
+    
     // событие после отпускания фишки, после её перетягивания
     piece.on('dragend' , function(){
+        
         var x = this.x();
         var y = this.y();
         
-        var next = self.calcNextPieces(pieceobj.id);
-            
-        for(var i = 0; i < next.length; i++){
-            self.movePiece(x , y , oldfield , next[i]);
+        console.log('dragend' , x , y , pieceobj.oldpos);
+        
+        if(x === pieceobj.oldpos.x){
+            self.selectPiece(this);
+        }else{
+        
+            var next = self.calcNextPieces(pieceobj.id);
+                
+            for(var i = 0; i < next.length; i++){
+                self.movePiece(x , y , oldfield , next[i]);
+            }
+        
         }
         
-        //self.movePiece(x , y , oldfield , pieceobj);<
         
     });
+    
+    // устанавливаем клики по фишке
+    this.setClicksPiece(piece , oldfield);
     
 };
 
@@ -931,24 +955,27 @@ Game.prototype.giveStep = function(){
 Game.prototype.selectPiece = function(piece){
     var self = this;
     
-    function select(piece){
-        self.selectedpiece = piece;
-        self.selectedpiece.strokeEnabled(true);
-        self.selectedpiece.stroke('#000');						
-	    self.board.stage.batchDraw();
-	    
-    }
+    console.info(this.selectedpiece);
     
     if(this.selectedpiece === false){
-        select(piece);
+        select(piece , this);
         this.setClickBoard();
         
     // если кликнули на ту же самую фишку - снимаем выделение
     }else if(this.selectedpiece.id() !== piece.id()){
-        select(piece);
+        this.unselectPiece();
+        select(piece , this);
         this.setClickBoard();
     }else{
         this.unselectPiece();
+    }
+    
+    function select(piece , obj){
+        obj.selectedpiece = piece;
+        obj.selectedpiece.strokeEnabled(true);
+        obj.selectedpiece.stroke('#000');
+	    obj.board.stage.batchDraw();
+	    
     }
 };
 
@@ -956,10 +983,13 @@ Game.prototype.selectPiece = function(piece){
     # Проверяем и снимаем выделение с выделенной фишки
 */
 Game.prototype.unselectPiece = function(){
+    console.log('unselect piece');
     if(this.selectedpiece !== false){
 	    this.selectedpiece.strokeEnabled(false);
 	    this.selectedpiece = false;
 	    this.board.stage.batchDraw();
+	}else{
+	    console.log('Нет выделенных изображений');
 	}
 };
 
@@ -973,6 +1003,9 @@ Game.prototype.setClickBoard = function(){
         
     this.board.mainlayer.on('click' , function(){
         if(self.selectedpiece !== false){
+            
+            console.log('click board');
+            
             var selectedpos = self.calcPiecePos(self.selectedpiece.id());
             var piece = self.getPiece(self.selectedpiece.id());
             
@@ -992,7 +1025,7 @@ Game.prototype.setClickBoard = function(){
                                 
             // если фишку перетянули из дома
             if(selectedpos[0] === 1){
-                this.rules.controllhead = false;
+                self.rules.controllhead = false;
             }
             
             // если можно сходить по кликанному полю
@@ -1044,7 +1077,7 @@ Game.prototype.setClickBoard = function(){
 /*
     # Функция проверяет сделан ли последний шаг
 */
-Game.prototype.lastStep = function(canmove , can){
+Game.prototype.lastStep = function(canmove){
     var countcomplete = 0;
     
     for(var i = 0; i < this.step.steps.length; i++){
@@ -1053,27 +1086,31 @@ Game.prototype.lastStep = function(canmove , can){
         }
     }
     
+    var can = this.calcCan();
+    
     if(this.step.steps.length === 2){
         if(countcomplete === 2){
             // есть ли возможные ходы
-            if(canmove === 0 || !can){
-                return false;
+            if(canmove === 0){
+                    return true;
             }else{
-                return true;
+                return false;
             }
         }else{
+            console.log('false here');
             return false;
         }
     }
     
     if(this.step.steps.length === 4){
         if(countcomplete === 4){
-            if(canmove === 0 || !can){
-                return false;
-            }else{
+            if(canmove === 0){
                 return true;
+            }else{
+                return false;
             }
         }else{
+            console.log('false here');
             return false;
         }
     }
@@ -1399,15 +1436,18 @@ Game.prototype.loadImages = function(callback){
     var self = this;
     var imagesrcWhite    = 'images/pieces/white.png';
     var imagesrcBlack    = 'images/pieces/black.png';
+    var imagesrcLight    = 'images/pieces/light.png';
     
     var whiteObj = new Image();
     var blackObj = new Image();
+    var lightObj = new Image();
     
     whiteObj.onload = function(){
-        self.imageObjects = {white : whiteObj , black : blackObj};
+        self.imageObjects = {white : whiteObj , black : blackObj , light : lightObj};
         
         callback();
     };
     whiteObj.src = imagesrcWhite;
     blackObj.src = imagesrcBlack;
+    lightObj.src = imagesrcLight;
 }
