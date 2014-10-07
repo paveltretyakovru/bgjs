@@ -15,7 +15,7 @@ Game.prototype.rules    = {};
 Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
-Game.prototype.meselement   = '#gamemessage';
+Game.prototype.meselement   = '#gamestatus';
 Game.prototype.type         = 'long';   // тип игры | long || prehouse
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
@@ -32,6 +32,7 @@ Game.prototype.ruletimemes  = 2000; // время на выведение соо
 Game.prototype.countsteps   = 0;
 Game.prototype.takehead     = [];
 Game.prototype.endstep      = false;
+Game.prototype.inhouse      = 0;
 
 Game.prototype.self         = {};
 Game.prototype.enemy        = {};
@@ -391,6 +392,7 @@ Game.prototype.countFreeSteps = function(){
 
 Game.prototype.calcCan = function(){
     var countcanmove = 0;
+    var canarray = [];
     for(var field = 1; field < this.board.fields.length; field++){
         // если поле содержит фишки
         if(this.board.fields[field].pieces.length !== 0){
@@ -400,11 +402,20 @@ Game.prototype.calcCan = function(){
                 // если поле может ходить
                 if(canmove){
                     countcanmove++;
+                    canarray.push(field);
                 }
             }
         }
     }
-}
+    
+    if(countcanmove === 0){
+        return false;
+    }else{
+        console.log('cans count: ' , countcanmove);
+        console.log('canfields: ' , canarray);
+        return true;
+    }
+};
 
 /*
     # Перебирает поля и активирует возможно ходящие фишки
@@ -412,6 +423,7 @@ Game.prototype.calcCan = function(){
     #
 */
 Game.prototype.activatePieces = function(){
+    if(this.inhouse !== 15){
     var countcanmove    = 0;
     var self            = this;
     
@@ -460,6 +472,8 @@ Game.prototype.activatePieces = function(){
         # Если закончились шаги
         # даем возможность отмены хода
     */
+    console.log('countcanmove: ' , countcanmove);
+    
     if(countcanmove === 0){
         console.log("Закончились шаги");
         this.setMessage("Отмена хода 3 сек");
@@ -475,10 +489,10 @@ Game.prototype.activatePieces = function(){
         }
         
         this.setDraggablePieces(pieces);
-        
+        var can = this.calcCan();
         // если игрок не отменил свой ход передаем ход
         setTimeout(function() {
-                if(self.lastStep()){
+                if(self.lastStep(countcanmove , can)){
                     // увеличиваем количество ходов
                     self.countsteps++;
                     // очищаем счетчик взятия с головы
@@ -502,6 +516,11 @@ Game.prototype.activatePieces = function(){
                     //}
                 }
         }, self.cancelStep);
+    }
+    
+    } // inhouse
+    else{
+        alert('Поздарвляем, Вы выиграли!');
     }
 };
 
@@ -813,6 +832,7 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     if(this.rules.prehouse){
         if(movefield >= 1 && movefield <= 6){
             movefield = 1;
+            this.inhouse++;
         }
     }
     
@@ -985,6 +1005,7 @@ Game.prototype.setClickBoard = function(){
                 if(self.rules.prehouse){
                     if(movefield >= 1 && movefield <= 6){
                         movefield = 1;
+                        self.inhouse++;
                     }
                 }
                 
@@ -1023,7 +1044,7 @@ Game.prototype.setClickBoard = function(){
 /*
     # Функция проверяет сделан ли последний шаг
 */
-Game.prototype.lastStep = function(){
+Game.prototype.lastStep = function(canmove , can){
     var countcomplete = 0;
     
     for(var i = 0; i < this.step.steps.length; i++){
@@ -1034,7 +1055,12 @@ Game.prototype.lastStep = function(){
     
     if(this.step.steps.length === 2){
         if(countcomplete === 2){
-            return true;
+            // есть ли возможные ходы
+            if(canmove === 0 || !can){
+                return false;
+            }else{
+                return true;
+            }
         }else{
             return false;
         }
@@ -1042,7 +1068,11 @@ Game.prototype.lastStep = function(){
     
     if(this.step.steps.length === 4){
         if(countcomplete === 4){
-            return true;
+            if(canmove === 0 || !can){
+                return false;
+            }else{
+                return true;
+            }
         }else{
             return false;
         }
@@ -1367,8 +1397,8 @@ Game.prototype.animateLot = function(lots){
 
 Game.prototype.loadImages = function(callback){
     var self = this;
-    var imagesrcWhite    = '../images/pieces/white.png';
-    var imagesrcBlack    = '../images/pieces/black.png';
+    var imagesrcWhite    = 'images/pieces/white.png';
+    var imagesrcBlack    = 'images/pieces/black.png';
     
     var whiteObj = new Image();
     var blackObj = new Image();

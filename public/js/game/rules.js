@@ -46,7 +46,7 @@ Rules.prototype.checkPrehouse = function(){
     // если до этого проводилась проверка
     if(this.prehouse) return true;
     
-    var needcount = this.game.pieces.length / 2;
+    var needcount = 15;
     var count = 0;
     
         for(var i = 0; i < this.game.pieces.length; i++){
@@ -755,7 +755,7 @@ Rules.prototype.canMove = function ( field ) {
                 this.checkFieldNum(field + this.step.steps[0][0] * i) ,
                 this.step.steps[0][0] * i
             );
-            if(!result){return false;}
+            //if(!result){return false;}
             if(result){return true;}
         }
         
