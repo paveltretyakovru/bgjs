@@ -683,17 +683,11 @@ Game.prototype.activatePieces = function(){
     if(countcanmove === 0){
         console.log("Закончились шаги");
         if(this.lastStep()){
-            this.setMessage("Закончились ходы");
+            this.setMessage("Закончились ходы. Отмена хода 3 секунды");
         }else{
             if(!this.calcCan()){
                 this.setMessage("Нет возможных ходов. Передача хода 3 сек");
             }
-        }
-        
-        if(this.calcCan()){
-            this.setMessage("Отмена хода 3 сек");
-        }else{
-            this.setMessage("Нет возможных ходов. Передача хода через 3 секунды");
         }
         
         var piece , piecepos;
@@ -1298,17 +1292,17 @@ Game.prototype.lastStep = function(canmove){
     if(this.step.steps.length === 2){
         if(countcomplete === 2){
             // сходали на все кости
-            return false;
-        }else{
             return true;
+        }else{
+            return false;
         }
     }
     
     if(this.step.steps.length === 4){
         if(countcomplete === 4){
-            return false
-        }else{
             return true;
+        }else{
+            return false;
         }
     }
 };
