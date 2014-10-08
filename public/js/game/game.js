@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'blocktest';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -539,8 +539,8 @@ Game.prototype.letsRock = function(){
         $('#home1pl').html('Вы <br /> <img src="images/pieces/white.png" width="25" />');
         $('#home2pl').html('Соперник <br /> <img src="images/pieces/black.png"  width="25" />');
     }else{
-        $('#home1pl').html('Вы <img src="images/pieces/black.png" />');
-        $('#home2pl').html('Соперник <img src="images/pieces/white.png" />');
+        $('#home1pl').html('Вы <br /><img src="images/pieces/black.png" width="25" />');
+        $('#home2pl').html('Соперник<br /> <img src="images/pieces/white.png" width="25"/>');
     }
     
     // Выводим сообщение
@@ -1515,10 +1515,10 @@ Game.prototype.takeGameData = function(data){
                 console.log('Получены данные начала игры с сервера: ' , data);
                 // Сохраняем значение костей для хода
                 //this.step.bones = data.bones;
-                //this.step.bones = [2 , 2];
+                this.step.bones = [2 , 2];
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
-                this.step.bones = [1 , 2];  // restep test
+                //this.step.bones = [1 , 2];  // restep test
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);

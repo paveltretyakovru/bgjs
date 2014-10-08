@@ -183,7 +183,7 @@ Rules.prototype.blockRule = function(oldfield , newfield){
             }else if(this.board.fields[i].pieces.length === 0){
                 emptycontroll = false;
             // если содержит фишку соперника
-            }else if(this.board.field[i].pieces.length !== 0){
+            }else if(this.board.fields[i].pieces.length !== 0){
                 // значит можно ставить блок
                 return true;
             }
