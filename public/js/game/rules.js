@@ -173,38 +173,34 @@ Rules.prototype.blockRule = function(oldfield , newfield){
     var controll        = 0;
     var backcontroll    = 0;
     
-    var tmpcontroll = true;
+    var emptycontroll = true;
     
     if(newfield >= 1 && newfield <= 12){
-        for(var i = newfield; i <= 12; i++){
-            if(this.haveEnemy(i)){
+        // проверяем фишки стоящеие впереди
+        for(var i = newfield+1; i <= 12; i++){
+            if(this.game.myField(i)){
+                if(emptycontroll) controll++;
+            }else if(this.board.fields[i].pieces.length === 0){
+                emptycontroll = false;
+            // если содержит фишку соперника
+            }else if(this.board.field[i].pieces.length !== 0){
+                // значит можно ставить блок
                 return true;
-            }else if(this.game.myField(i)){
-                if(this.game.board.fields[i].pieces.length === 0){
-                    tmpcontroll = false;
-                    break;
-                }else{
-                    if(tmpcontroll)controll++;
-                }
-                
-            }
-            
-            if(controll === 6){
-                return false;
             }
         }
-        tmpcontroll = true;
-        for(var i = newfield; i >= 1; i--){
+        
+        emptycontroll = true;
+        
+        for(var i = newfield-1; i >= 1; i--){
             if(this.game.myField(i)){
-                if(this.game.board.fields[i].pieces.length === 0){
-                    tmpcontroll = false;
-                    break;
-                }else{
-                    if(tmpcontroll) backcontroll++;
-                }
+                if(emptycontroll) backcontroll++;
+            }else if(this.board.fields[i].pieces.length === 0){
+                emptycontroll = false;
             }
         }
     }
+    
+    console.log('backcontroll controll' , backcontroll , controll);
     
     if(backcontroll + 1 >= 6){
         console.log('backcontroll + 1' , backcontroll + 1);
@@ -218,6 +214,11 @@ Rules.prototype.blockRule = function(oldfield , newfield){
     
     if(controll + 1 >= 6){
         console.log('controll + 1' , controll + 1);
+        return false;
+    }
+    
+    if(controll + backcontroll + 1 >= 6){
+        console.log('controll + backcontroll + 1' , controll + backcontroll + 1);
         return false;
     }
     
@@ -667,6 +668,13 @@ Rules.prototype.canMove = function ( field ) {
         }
     }
     
+    // разрешаем передвиже поля, учавствего в истории ходов
+    /*for(var i = 0; i < this.step.steps.length; i++){
+        if(field === this.step.steps[i][1]){
+            return true;
+        }
+    }*/
+    
     if(this.step.steps.length === 2){
         // может ли сходить на первую кость
         if(this.step.steps[0][1] === 0){
@@ -677,7 +685,10 @@ Rules.prototype.canMove = function ( field ) {
             result = this.handleRules(field , this.checkFieldNum(this.step.steps[0][0] + field) , boneval);
         }
         
-        if (result){return true;}
+        if (result){
+            console.log('return true here');
+            return true;
+        }
         
         // может ли сходить на вторую кость
         if(this.step.steps[1][1] === 0){
@@ -685,14 +696,20 @@ Rules.prototype.canMove = function ( field ) {
             result = this.handleRules(field , this.checkFieldNum(this.step.steps[1][0] + field) , boneval);
         }
         
-        if (result){return true;}
+        if (result){
+            console.log('return true here');
+            return true;
+        }
         
         if(this.step.steps[0][1] !== 0 && this.step.steps[1][1] === 0){
             boneval = this.step.steps[1][0];
             result = this.handleRules(field , this.checkFieldNum(this.step.steps[0][2] + this.step.steps[1][0]) , boneval);
         }
         
-        if(result){return true;}
+        if(result){
+            console.log('return true here');
+            return true;
+        }
         
         // может ли сходить на сумму костей
         if(this.step.steps[1][1] === 0 && this.step.steps[0][1] === 0){
@@ -703,7 +720,7 @@ Rules.prototype.canMove = function ( field ) {
                     boneval
                 );
         }
-        
+        console.log('return true here' , result);
         return result;
     }
     
@@ -723,9 +740,13 @@ Rules.prototype.canMove = function ( field ) {
                 this.step.steps[0][0] * i
             );
             //if(!result){return false;}
-            if(result){return true;}
+            if(result){
+                console.log('return true here');
+                return true;
+            }
         }
         
+        console.log('return true here' , result);
         return result;
     }
 };
