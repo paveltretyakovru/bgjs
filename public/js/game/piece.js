@@ -6,6 +6,7 @@ var Piece = function(color , id , layer , stage , type , imageObjects , game , b
     if(imageObjects !== undefined){
         this.whiteObj = imageObjects.white;
         this.blackObj = imageObjects.black;
+        this.lightObj = imageObjects.light;
     }else{
         controll = false;
         console.error("Ошибка при загрузки изображений фишек");
@@ -31,6 +32,9 @@ var Piece = function(color , id , layer , stage , type , imageObjects , game , b
         case 'black':
             imagesrc    = 'images/pieces/black.png';
             break;
+        case 'light':
+            imagesrc    = 'images/pieces/light.png';
+            break;
         default:
             console.error('Передан неизвестный цвет фишек');
             controll = false;
@@ -44,6 +48,8 @@ var Piece = function(color , id , layer , stage , type , imageObjects , game , b
             pimage = this.whiteObj;
         }else if(color === 'black'){
             pimage = this.blackObj;
+        }else if(color === 'light'){
+            pimage = this.lightObj;
         }
         
         //pimage = new Image();
@@ -103,6 +109,7 @@ Piece.prototype.oldpos  = {};
 
 Piece.prototype.blackObj;
 Piece.prototype.whiteObj;
+Piece.prototype.lightObj;
 Piece.prototype.game;
 Piece.prototype.board;
 Piece.prototype.nextp;

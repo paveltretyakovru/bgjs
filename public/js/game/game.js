@@ -37,6 +37,7 @@ Game.prototype.inhouse      = 0;
 Game.prototype.self         = {};
 Game.prototype.enemy        = {};
 Game.prototype.imageObjects = {};
+Game.prototype.light        = {};
 
 Game.prototype.step         = {
     player      : ''        ,   // self || enemy 
@@ -907,17 +908,16 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     
     node.on('click' , function(){
         console.log('CONSOLE LOOOOG!');
-        if(!this.indrag){
-            console.log('CLICED! :-)');
-            var node = this;
-            if(timer) clearTimeout(timer);
+        console.log('CLICED! :-)');
+        var node = this;
+        if(timer) clearTimeout(timer);
             
-            timer = setTimeout(function() {
-                console.log('click :-)');
-                self.selectPiece(node);
+        timer = setTimeout(function() {
+            console.log('click :-)');
+            self.selectPiece(node);
                 
-            }, self.dblclicktime);
-        }
+        }, self.dblclicktime);
+        
     });
     
     // двойной клик по фишке перемещает фишку на минимальное значение
@@ -1210,15 +1210,16 @@ Game.prototype.selectPiece = function(piece){
         select(piece , this);
         this.setClickBoard();
     }else{
-        this.unselectPiece();
+        select(piece , this);
     }
     
     function select(piece , obj){
         obj.selectedpiece = piece;
-        obj.selectedpiece.strokeEnabled(true);
-        obj.selectedpiece.stroke('#000');
-	    obj.board.stage.batchDraw();
-	    
+        
+        console.log('select piece');
+        piece.setImage(obj.imageObjects.light);
+        
+        obj.board.stage.batchDraw();
     }
 };
 
@@ -1228,8 +1229,13 @@ Game.prototype.selectPiece = function(piece){
 Game.prototype.unselectPiece = function(){
     console.log('unselect piece');
     if(this.selectedpiece !== false){
-	    this.selectedpiece.strokeEnabled(false);
+	    if(this.piececolor === 'white'){
+	        this.selectedpiece.setImage(this.imageObjects.white);
+	    }else{
+	        this.selectedpiece.setImage(this.imageObjects.black);
+	    }
 	    this.selectedpiece = false;
+	    
 	    this.board.stage.batchDraw();
 	}else{
 	    console.log('Нет выделенных изображений');
@@ -1350,6 +1356,7 @@ Game.prototype.lastStep = function(canmove){
 Game.prototype.blockedPieces = function(){
     for(var i = 0; i < this.pieces.length; i++){
         this.pieces[i].obj.draggable(false);
+        this.pieces[i].obj.off('click');
     }
 };
 
