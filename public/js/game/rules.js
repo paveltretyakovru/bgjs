@@ -104,7 +104,9 @@ Rules.prototype.prehouseRules = function(oldfield , newfield , boneval){
         
     if(boneval > 25 - oldfield){
         for(var i = oldfield - 1; i > 18; i--){
-            if(this.game.board.fields[i].pieces.length !== 0){
+            if(
+                this.game.board.fields[i].pieces.length !== 0 &&
+                this.game.myField(i)){
                 return false;
             }
         }
@@ -695,9 +697,12 @@ Rules.prototype.canMove = function ( field ) {
         }
     }
     
+    console.log('FIELD FIELD');
+    
     // разрешаем передвиже поля, учавствего в истории ходов
     /*for(var i = 0; i < this.step.steps.length; i++){
         if(field === this.step.steps[i][1]){
+            console.log('controll history' , field , i , this.step.steps[i]);
             return true;
         }
     }*/

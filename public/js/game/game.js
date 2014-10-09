@@ -605,6 +605,7 @@ Game.prototype.calcCan = function(){
         if(this.board.fields[field].pieces.length !== 0){
             // является ли поле игрока
             if(this.myField(field)){
+                console.log('from calcCan');
                 var canmove = this.rules.canMove(field);
                 // если поле может ходить
                 if(canmove){
@@ -649,20 +650,30 @@ Game.prototype.activatePieces = function(){
         if(this.board.fields[field].pieces.length !== 0){
             // является ли поле игрока
             if(this.myField(field)){
+                console.log('from activatePieces');
                 var canmove = this.rules.canMove(field);
+                
+                for(var n = 0; n < this.step.steps.length; n++){
+                    if(this.step.steps[n][2] === field && field !== 1){
+                        canmove = true;
+                    }
+                }
+                
                 // если поле может ходить
                 if(canmove){
                     countcanmove++;
                     
                     // получаем количество оставшихся ходов
                     var countfreesteps = this.countFreeSteps();
+                    
+                    console.log('canmove' , field , countfreesteps);
+                    
                     var lastpieces = this.getLastPieces(field , countfreesteps);
                     
                     // получаем последнюю фишку
-                    var lastpiece = this.getLastPiece(field);
+                    //var lastpiece = this.getLastPiece(field);
                     
                     this.setDraggablePieces(lastpieces , field);
-                    
                     
                 }else{
                     console.log('Поле непередвигаемое' , field);
