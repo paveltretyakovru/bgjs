@@ -1573,25 +1573,13 @@ Game.prototype.moveBonesToNeed = function(){
     if(this.onepos){
         if(this.step.player === 'enemy'){
             this.bones.moveToSide(2 , this.enemy.side);
-            
-            /*
-            if(this.enemy.side === 'left'){
-                this.bones.moveToSide(2 , 'left');
-            }else{
-                this.bones.moveToSide(2 , 'right');
-            }
-            */
         }else{
             this.bones.moveToSide(2 , this.side);
-            /*
-            if(this.enemy.side === 'left'){
-                this.bones.moveToSide(2 , 'right');
-            }else{
-                this.bones.moveToSide(2 , 'left');
-            }
-            */
         }
     }
+    
+    // меняем верхний отступ у костей дубля
+    this.bones.changeDublePos();
 };
 
 /*

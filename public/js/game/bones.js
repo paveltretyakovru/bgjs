@@ -38,6 +38,15 @@ Bones.prototype.getBoardParams = function(){
 };
 
 /*
+    Обновляет позицию костей дубля. Смещая их чуть ниже
+*/
+Bones.prototype.changeDublePos = function(){
+    var bone1pos  = $(this.elements[0]).offset();
+    $(this.elements[2] + ',' + this.elements[3]).css('top' , bone1pos.top + 80);
+    
+};
+
+/*
     # Функция телепортирует кость bone (= 0 | 1)
     # в указанную часть side (= left | right)
     #
