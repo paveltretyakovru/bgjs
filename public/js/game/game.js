@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -653,11 +653,12 @@ Game.prototype.activatePieces = function(){
                 console.log('from activatePieces');
                 var canmove = this.rules.canMove(field);
                 
+                /*
                 for(var n = 0; n < this.step.steps.length; n++){
                     if(this.step.steps[n][2] === field && field !== 1){
                         canmove = true;
                     }
-                }
+                } */
                 
                 // если поле может ходить
                 if(canmove){
@@ -744,7 +745,18 @@ Game.prototype.activatePieces = function(){
     
     } // inhouse
     else{
-        alert('Поздарвляем, Вы выиграли!');
+        $('#finish_dialog').html('<p><h3>Поздравляем! Вы одержали победу</h3><p>');
+        $('#finish_dialog').dialog({
+            modal : true ,
+            buttons : {
+                'Закрыть' : function(){
+                    $(this).dialog('close');
+                } ,
+                'Начать сначала' : function(){
+                    $(this).dialog('close');
+                }
+            }
+        });
     }
 };
 
