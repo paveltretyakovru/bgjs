@@ -833,6 +833,9 @@ Game.prototype.takeStep = function(data){
                 
                 }
                 
+                // проверяем, все ли фишки находятся на своем месте
+                this.checkPiecesPosition();
+                
             }else{
                 console.error('Переданы не все параметры для отображения хода');
             }
@@ -852,6 +855,40 @@ Game.prototype.transformEnemyStep = function(field){
         return 12 + field;
     }else{
         return field - 12;
+    }
+};
+
+
+/*
+    # Функция-процедура перебирает фишки и проверяет
+    # корректны ли их координаты, и если они не корректны - то
+    # перемещает их в нужную позицию
+*/
+Game.prototype.checkPiecesPosition = function(){
+    // перебираем поля доски
+    for(var fieldnum = 1; fieldnum < this.board.fields.length; fieldnum++){
+        var field = this.board.fields[fieldnum];
+        // если поле не пустое
+        if(field.pieces.length !== 0){
+            // перебираем идентификаторы фишек на данном поле
+            for(var piecenum = 0; piecenum < field.pieces.length; piecenum++){
+                // получаем объект фишки
+                var piece = this.getPiece(field.pieces[piecenum]);
+                // вычисляем текущее положение фишки
+                var x = piece.obj.x();
+                var y = piece.obj.y();
+                
+                // вычисляем положение, которое должно быть у фишки
+                var needpos = this.board.calcPosCoords([fieldnum , piecenum]);
+                
+                // если координаты не совпадают
+                if(needpos.x !== x || needpos.y !== y ){
+                    //console.log('Фишка не на своем месте!' , fieldnum , piecenum , piece.id);
+                    // перемещаем фишку в нужную позицию
+                    piece.moveTo(needpos.x , needpos.y);
+                }
+            }
+        }
     }
 };
 
@@ -1119,6 +1156,9 @@ Game.prototype.endDrag = function(piece){
     this.giveStep();
     
     this.bones.lightControll(this.step.steps , false);
+    
+    // проверяем, все ли фишки находятся на своем месте
+    this.checkPiecesPosition();
     
     // пересчитываем и переактивируем новые фишки
     this.activatePieces();
