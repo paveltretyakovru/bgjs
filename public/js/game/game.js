@@ -1566,6 +1566,7 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
                 //this.step.bones = [1 , 2];  // restep test
+                this.step.bones = [1 , 5];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);

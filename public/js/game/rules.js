@@ -278,29 +278,56 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         # Игрок передвигает фишку назад
     */
     if(newfield < oldfield){
+        var max = false;
+        var too = [];
         for(var i = 0; i < this.step.steps.length; i++){
             // ищем в истории поле с которого передвинута фишка
             if(this.step.steps[i][1] === oldfield){
                 // проверяем ходит ли той же фишкой
                 if(this.step.steps[i][3] === pieceid){
-                    result = this.step.steps[i][2];
-                    
-                    // если фишка возвращается в голову даем разрешение на перемещение головы
-                    if(this.step.steps[i][2] === 1){
-                        this.controllhead = true;
+                    if(max){
+                        if(max.field < this.step.steps[i][2]){
+                            max = {field : this.step.steps[i][2] , n : i};
+                        }else if(max.field === this.step.steps[i][2]){
+                            too.push(i);
+                        }
+                        
+                        
+                    }else{
+                        max = {field : this.step.steps[i][2] , n : i};
                     }
-                    // стираем значение текущей ичейки очка
-                    this.step.steps[i][1] = 0;
-                    this.step.steps[i][2] = 0;
-                    this.step.steps[i][3] = 0;
-                    
-                    this.addSendStep([pieceid , result]);
-                    
-                    // если найдено в истории, возвращаем значение предыдущего хода
-                    // этой фишки
-                    return result;
                 }
             }
+        }
+        
+        if(max){
+            console.log('max' , max);
+            
+            // если фишка возвращается в голову даем разрешение на перемещение головы
+            if(this.step.steps[max.n][2] === 1){
+                this.controllhead = true;
+            }
+            
+            // стираем значение текущей ичейки очка
+            this.step.steps[max.n][1] = 0;
+            this.step.steps[max.n][2] = 0;
+            this.step.steps[max.n][3] = 0;
+            
+            this.addSendStep([pieceid , max.field]);
+            
+            /* если есть поля значение костей с таким же предыдущим полем, затираем их */
+            if(too.length !== 0){
+                for(var i = 0; i < too.length; i++){
+                    // стираем значение текущей ичейки очка
+                    this.step.steps[too[i]][1] = 0;
+                    this.step.steps[too[i]][2] = 0;
+                    this.step.steps[too[i]][3] = 0;
+                }
+            }
+            
+            // если найдено в истории, возвращаем значение предыдущего хода
+            // этой фишки
+            return max.field;
         }
     }
     
