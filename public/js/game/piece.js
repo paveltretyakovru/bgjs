@@ -26,10 +26,10 @@ var Piece = function(color , id , layer , stage , type , imageObjects , game , b
     
     switch (color) {
         case 'white':
-            imagesrc    = '../images/pieces/white.png';
+            imagesrc    = 'images/pieces/white.png';
             break;
         case 'black':
-            imagesrc    = '../images/pieces/black.png';
+            imagesrc    = 'images/pieces/black.png';
             break;
         default:
             console.error('Передан неизвестный цвет фишек');

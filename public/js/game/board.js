@@ -10,7 +10,7 @@ var Board = function(){}
 /* configs values */
 Board.prototype.width       = 600;
 Board.prototype.height      = 600;
-Board.prototype.image       = '../images/tables/2dboard.png';
+Board.prototype.image       = 'images/tables/2dboard.png';
 Board.prototype.htmlid      = 'container';
 Board.prototype.imagex      = 0;
 Board.prototype.imagey      = 0;
