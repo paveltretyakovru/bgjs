@@ -28,9 +28,30 @@
 	<script type="text/javascript" src="../js/system.js"></script>
 	<link rel="stylesheet" type="text/css" href="../css/style.css">
 	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#btest').click(function(){
+				$('#finish_dialog').dialog({
+		            modal : false ,
+		            buttons : {
+		                'Закрыть' : function(){
+		                    $(this).dialog('close');
+		                } ,
+		                'Начать сначала' : function(){
+		                    $(this).dialog('close');
+		                }
+		            } ,
+		            minWidth : 500
+		        });
+		        
+		        $('.ui-dialog-titlebar').remove();
+			});
+		});
+	</script>
+	
 </head>
 <body onmousedown='return false;'>
-
+	<button id='btest'>Показать окно</button>
 	<div id='gamestatus'></div>
 	<div id='home1pl'>*</div>
 	<div id='home2pl'>*</div>
@@ -42,8 +63,10 @@
     
 	</div>
 	
-<div id='finish_dialog' style='visibility : hidden' title='Конец игры'>
-	
+<div id='finish_dialog'>
+	<p>
+		Игра окончена
+	</p>
 </div>
 	
 <div class="die" id="die1">

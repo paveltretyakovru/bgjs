@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -994,11 +994,7 @@ Game.prototype.setDraggablePieces = function(pieces){
     var self        = this;
     var next        = {};
     
-    console.log('setDraggablePieces' , pieces);
-    
     pieces = this.addHistoryPieces(pieces);
-    
-    console.log('setDraggablePieces after' , pieces);
     
     // устанавливаем клики по доске
     this.setClickBoard();
