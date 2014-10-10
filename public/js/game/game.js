@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -512,7 +512,6 @@ Game.prototype.setListener = function(name , obj , fun){
 };
 
 Game.prototype.sendRequest = function(name , data){
-    console.log('sendRequest' , name , data);
     this.socket.connection.emit(name , data);
 };
 
@@ -605,7 +604,6 @@ Game.prototype.calcCan = function(){
         if(this.board.fields[field].pieces.length !== 0){
             // является ли поле игрока
             if(this.myField(field)){
-                console.log('from calcCan');
                 var canmove = this.rules.canMove(field);
                 // если поле может ходить
                 if(canmove){
@@ -650,15 +648,7 @@ Game.prototype.activatePieces = function(){
         if(this.board.fields[field].pieces.length !== 0){
             // является ли поле игрока
             if(this.myField(field)){
-                console.log('from activatePieces');
                 var canmove = this.rules.canMove(field);
-                
-                /*
-                for(var n = 0; n < this.step.steps.length; n++){
-                    if(this.step.steps[n][2] === field && field !== 1){
-                        canmove = true;
-                    }
-                } */
                 
                 // если поле может ходить
                 if(canmove){
@@ -666,8 +656,6 @@ Game.prototype.activatePieces = function(){
                     
                     // получаем количество оставшихся ходов
                     var countfreesteps = this.countFreeSteps();
-                    
-                    console.log('canmove' , field , countfreesteps);
                     
                     var lastpieces = this.getLastPieces(field , countfreesteps);
                     
@@ -677,11 +665,11 @@ Game.prototype.activatePieces = function(){
                     this.setDraggablePieces(lastpieces , field);
                     
                 }else{
-                    console.log('Поле непередвигаемое' , field);
+                    //console.log('Поле непередвигаемое' , field);
                 }
             }else{
                 if(field === 1 || field === 13){
-                    console.log('Это не поле игрока' , field);
+                    //console.log('Это не поле игрока' , field);
                 }
             }
         }       // if pieces.length !== 0
@@ -691,10 +679,8 @@ Game.prototype.activatePieces = function(){
         # Если закончились шаги
         # даем возможность отмены хода
     */
-    console.log('countcanmove: ' , countcanmove);
     
     if(countcanmove === 0){
-        console.log("Закончились шаги");
         if(this.lastStep()){
             this.setMessage("Закончились ходы. Отмена хода 3 секунды");
         }else{
@@ -787,7 +773,6 @@ Game.prototype.finishSteps = function(){
 
 Game.prototype.stepBegin = function(data){
     if('bones' in data){
-        console.log('stepBegin' , data);
         // меняем значение костей
         this.step.bones = data.bones;
         // указываем, что наш ход
@@ -807,7 +792,6 @@ Game.prototype.stepBegin = function(data){
 
 Game.prototype.takeBones = function(data){
     if('bones' in data){
-        console.log('takeBones' , data);
         // сохраняем занчение костей
         this.step.bones = data.bones;
         // перемещаем, взбалтываем и меняем значение костей
@@ -818,8 +802,6 @@ Game.prototype.takeBones = function(data){
 };
 
 Game.prototype.takeStep = function(data){
-    console.log('получен шаг соперника' , data);
-    
     switch (this.sendstep) {
         // если передается каждый ход по отдельности
         case 'every':
@@ -836,8 +818,6 @@ Game.prototype.takeStep = function(data){
                 
                     // удаляем идентификатор фишки из предыдущей позиции
                     this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
-                    
-                    console.log(piece);
                     
                     var field = this.transformEnemyStep(data.newfield);
                     
@@ -927,30 +907,23 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     
     // если фишка последняя в ряду, то ее можно выделять
     if(pieceobj.last){
-        console.log('set click last piece');
     
     node.on('click' , function(){
-        console.log('CONSOLE LOOOOG!');
-        console.log('CLICED! :-)');
         var node = this;
         if(timer) clearTimeout(timer);
-            
         timer = setTimeout(function() {
-            console.log('click :-)');
             self.selectPiece(node);
-                
         }, self.dblclicktime);
         
     });
     
     // двойной клик по фишке перемещает фишку на минимальное значение
     node.on('dblclick' , function(){
-        console.log('dableclick');
         var node = this;
         
         clearTimeout(timer);
         
-        var nowfield = self.calcPiecePos(node.id())
+        var nowfield = self.calcPiecePos(node.id());
         
         // вычисляем поле, на которое может сходить фишка
         var movefield   =   self.rules.calcMove(
@@ -962,6 +935,14 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         // если фишку перетянули из дома
         if(oldfield === 1){
             self.rules.controllhead = false;
+        }
+        
+        // если фишку перещаем в дом
+        if(self.rules.prehouse){
+            if(movefield >= 1 && movefield <= 6){
+                movefield = 1;
+                self.inhouse++;
+            }
         }
         
         // удаляем идентификатор фишки из предыдущей позиции
@@ -983,6 +964,26 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     }
 };
 
+Game.prototype.addHistoryPieces = function(pieces){
+    for(var i = 0; i < this.step.steps.length; i++){
+        if(this.step.steps[i][1] !== 0){
+            var have    = false;
+            var hp      = this.step.steps[i][3];
+            hp          = this.getPiece(hp);
+            for(var n = 0; n < pieces.length; n++){
+                if(hp.id === pieces[n].id){
+                    have = true;
+                }
+            }
+            if(!have){
+                pieces.push(hp);
+            }
+        }
+    }
+    
+    return pieces;
+};
+
 /*
     # Осноавная функция перебирающая фишки для их активации
     # и создания дополнительных обработчиков
@@ -992,6 +993,12 @@ Game.prototype.setDraggablePieces = function(pieces){
     var field;
     var self        = this;
     var next        = {};
+    
+    console.log('setDraggablePieces' , pieces);
+    
+    pieces = this.addHistoryPieces(pieces);
+    
+    console.log('setDraggablePieces after' , pieces);
     
     // устанавливаем клики по доске
     this.setClickBoard();
@@ -1065,8 +1072,6 @@ Game.prototype.setDraggable = function(piece , oldfield){
         var x = this.x();
         var y = this.y();
         
-        console.log('dragend' , x , y , pieceobj.oldpos);
-        
         if(x === pieceobj.oldpos.x && y === pieceobj.oldpos.y){
             self.selectPiece(this);
         }else{
@@ -1089,7 +1094,6 @@ Game.prototype.setDraggable = function(piece , oldfield){
 
 Game.prototype.calcNextPieces = function(id){
     var pos     = this.calcPiecePos(id);
-    console.log('calcNextPieces' , pos , id);
     var pieces  = this.board.fields[pos[0]].pieces;
     var next    = [];
     
@@ -1239,7 +1243,6 @@ Game.prototype.selectPiece = function(piece){
     function select(piece , obj){
         obj.selectedpiece = piece;
         
-        console.log('select piece');
         piece.setImage(obj.imageObjects.light);
         
         obj.board.stage.batchDraw();
@@ -1250,7 +1253,6 @@ Game.prototype.selectPiece = function(piece){
     # Проверяем и снимаем выделение с выделенной фишки
 */
 Game.prototype.unselectPiece = function(){
-    console.log('unselect piece');
     if(this.selectedpiece !== false){
 	    if(this.piececolor === 'white'){
 	        this.selectedpiece.setImage(this.imageObjects.white);
@@ -1275,8 +1277,6 @@ Game.prototype.setClickBoard = function(){
         
     this.board.mainlayer.on('click' , function(){
         if(self.selectedpiece !== false){
-            
-            console.log('click board');
             
             var selectedpos = self.calcPiecePos(self.selectedpiece.id());
             var piece = self.getPiece(self.selectedpiece.id());
@@ -1499,21 +1499,10 @@ Game.prototype.myField = function(field){
            // значит поле игрока
            return true;
        }else{
-           if(field === 1){
-            console.log('Не совпадает цвет фишки. ' 
-                        + '  piececolor:' + this.pieces[piecenum].color 
-                        + '; mycolor: ' + this.piececolor 
-                        + '; pieceid: ' + this.pieces[piecenum].id
-                        + '; piecenum: ' + piecenum);
-                        this.pieces[piecenum].obj.stroke('green');
-           }
            return false;
        }
     // если поле свободное
     }else{
-        if(field === 1){
-            console.log('Поле свободное' , field);
-        }
         return false;
     }
 };
@@ -1589,7 +1578,7 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
                 //this.step.bones = [1 , 2];  // restep test
-                this.step.bones = [1 , 5];
+                //this.step.bones = [1 , 5];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
@@ -1640,6 +1629,9 @@ Game.prototype.takeGameData = function(data){
 };
 
 Game.prototype.moveBonesToNeed = function(){
+    // меняем верхний отступ у костей дубля
+    this.bones.changeDublePos();
+    
     // если фишки должны всегда находиться в одном положении
     if(this.onepos){
         if(this.step.player === 'enemy'){
@@ -1648,9 +1640,6 @@ Game.prototype.moveBonesToNeed = function(){
             this.bones.moveToSide(2 , this.side);
         }
     }
-    
-    // меняем верхний отступ у костей дубля
-    this.bones.changeDublePos();
 };
 
 /*

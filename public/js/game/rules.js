@@ -88,7 +88,7 @@ Rules.prototype.haveEnemy = function(newfield){
     # Правила для момента вывода в дом
 */
 Rules.prototype.prehouseRules = function(oldfield , newfield , boneval){
-    console.log('oldfield: ' + oldfield + '; newfield: ' + newfield + '; boneval: ' + boneval);
+    //console.log('oldfield: ' + oldfield + '; newfield: ' + newfield + '; boneval: ' + boneval);
     
     if(oldfield === 19){
         return true;
@@ -202,25 +202,23 @@ Rules.prototype.blockRule = function(oldfield , newfield){
         }
     }
     
-    console.log('backcontroll controll' , backcontroll , controll);
-    
     if(backcontroll + 1 >= 6){
-        console.log('backcontroll + 1' , backcontroll + 1);
+        //console.log('backcontroll + 1' , backcontroll + 1);
         return false;
     }
     
     if(backcontroll + controll >= 6){
-        console.log('backcontroll + controll' , backcontroll + controll);
+        //console.log('backcontroll + controll' , backcontroll + controll);
         return false;
     }
     
     if(controll + 1 >= 6){
-        console.log('controll + 1' , controll + 1);
+        //console.log('controll + 1' , controll + 1);
         return false;
     }
     
     if(controll + backcontroll + 1 >= 6){
-        console.log('controll + backcontroll + 1' , controll + backcontroll + 1);
+        //console.log('controll + backcontroll + 1' , controll + backcontroll + 1);
         return false;
     }
     
@@ -303,8 +301,6 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         }
         
         if(max){
-            console.log('max' , max);
-            
             // если фишка возвращается в голову даем разрешение на перемещение головы
             if(this.step.steps[max.n][2] === 1){
                 this.controllhead = true;
@@ -384,14 +380,11 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     # Либо делаем ход на вторую кость классически :-)
                 */
                 
-                console.log('step2 classic');
-                
                 boneval = this.step.steps[1][0];
                 num2 = this.checkFieldNum(this.step.steps[1][0] + oldfield);
                 
                 result = this.handleRules(oldfield , num2 , boneval);
                 if(result){
-                    console.log('step2 classic result ' , num2 , newfield);
                     can2 = num2;
                 }
             }
@@ -442,7 +435,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can1]);
             
-            console.log('return here');
+            //console.log('return here');
             
             return can1;
         }
@@ -457,7 +450,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                 
                 this.addSendStep([pieceid , can2]);
                 
-                console.log('return here');
+                //console.log('return here');
                 
                 return can2;
         }
@@ -470,7 +463,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can2]);
             
-            console.log('return here');
+            //console.log('return here');
             
             return can2;
         }
@@ -489,7 +482,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can3]);
             
-            console.log('return here');
+            //console.log('return here');
             
             return can3;
         }
@@ -501,7 +494,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
             
             this.addSendStep([pieceid , can4]);
             
-            console.log('return here');
+            //console.log('return here');
             
             return can4;
         }
@@ -509,7 +502,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         // если к функции идет обращение через клик на доску
         
         if(clickboard !== undefined){
-            console.log('clickboard click.' , newfield , can1 , can2 , can3 , can4);
+            //console.log('clickboard click.' , newfield , can1 , can2 , can3 , can4);
             return false;
         }
         
@@ -624,7 +617,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
         // Если на переведенное поле не может сходить фишка,
         // переводим на ближайшее возможное
         
-        console.log('controll clickboard' , clickboard);
+        //console.log('controll clickboard' , clickboard);
         
         if(clickboard !== undefined){
             return false;
@@ -697,28 +690,16 @@ Rules.prototype.canMove = function ( field ) {
         }
     }
     
-    console.log('FIELD FIELD');
-    
-    // разрешаем передвиже поля, учавствего в истории ходов
-    /*for(var i = 0; i < this.step.steps.length; i++){
-        if(field === this.step.steps[i][1]){
-            console.log('controll history' , field , i , this.step.steps[i]);
-            return true;
-        }
-    }*/
-    
     if(this.step.steps.length === 2){
         // может ли сходить на первую кость
         if(this.step.steps[0][1] === 0){
             boneval = this.step.steps[0][0];
             
-            console.log();
-            
             result = this.handleRules(field , this.checkFieldNum(this.step.steps[0][0] + field) , boneval);
         }
         
         if (result){
-            console.log('return true here');
+            //console.log('return true here');
             return true;
         }
         
@@ -729,7 +710,7 @@ Rules.prototype.canMove = function ( field ) {
         }
         
         if (result){
-            console.log('return true here');
+            //console.log('return true here');
             return true;
         }
         
@@ -739,7 +720,7 @@ Rules.prototype.canMove = function ( field ) {
         }
         
         if(result){
-            console.log('return true here');
+            //console.log('return true here');
             return true;
         }
         
@@ -752,7 +733,7 @@ Rules.prototype.canMove = function ( field ) {
                     boneval
                 );
         }
-        console.log('return true here' , result);
+        //console.log('return true here' , result);
         return result;
     }
     
@@ -765,6 +746,15 @@ Rules.prototype.canMove = function ( field ) {
             }
         }
         
+        if(free !== 0){
+            result = this.handleRules(
+                field ,
+                this.checkFieldNum(field + this.step.steps[0][0]) ,
+                this.step.steps[0][0]
+            );
+        }
+        
+        /*
         for(var i = 1; i <= free; i++){
             result = this.handleRules(
                 field ,
@@ -773,12 +763,13 @@ Rules.prototype.canMove = function ( field ) {
             );
             //if(!result){return false;}
             if(result){
-                console.log('return true here');
+                //console.log('return true here');
                 return true;
             }
         }
+        */
         
-        console.log('return true here' , result);
+        //console.log('return true here' , result);
         return result;
     }
 };

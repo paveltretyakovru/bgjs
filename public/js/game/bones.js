@@ -7,7 +7,7 @@ Bones.prototype.board       = '#container';
 Bones.prototype.vals        = [0 , 0];
 Bones.prototype.size        = 40;
 Bones.prototype.selector    = {};
-Bones.prototype.moveanimtime=1000; // время перемещения фишек
+Bones.prototype.moveanimtime=500; // время перемещения фишек
 Bones.prototype.shaketime   = 500;// время встярски костей
 
 /*
@@ -23,7 +23,7 @@ Bones.prototype.getBoardParams = function(){
     var part        = width / 4                 ;   // четверть ширины доски
     var half        = starty + height / 2 - 20  ;   // половина высоты доски
     var leftpart    = startx + part             ;   // центр левой половины
-    var rightpart   = startx + part * 3         ;  // центр правой половины
+    var rightpart   = startx + part * 3 - 50         ;  // центр правой половины
    
    return {
         startx      : startx    ,   // позиция доски по х
@@ -42,7 +42,7 @@ Bones.prototype.getBoardParams = function(){
 */
 Bones.prototype.changeDublePos = function(){
     var bone1pos  = $(this.elements[0]).offset();
-    $(this.elements[2] + ',' + this.elements[3]).css('top' , bone1pos.top + 80);
+    $(this.elements[2] + ',' + this.elements[3]).css('top' , bone1pos.top);
     
 };
 
@@ -68,7 +68,12 @@ Bones.prototype.hideDop = function(){
     #
 */
 Bones.prototype.moveToSide = function(bone , side){
-    var board = this.getBoardParams();
+    var board   = this.getBoardParams();
+    var self    = this;
+    var bone1pos  = $(this.elements[0]).offset();
+    
+    // меняем верхнее положение доп. костей
+    $(this.elements[2] + ',' + this.elements[3]).css('top' , bone1pos.top);
     
     switch(bone){
         // Перемещаем 2 фишки
@@ -90,33 +95,68 @@ Bones.prototype.moveToSide = function(bone , side){
         case 4:
             // перемещение в лево
             if(side === 'left'){
+                // перемещаем главные кости
                 $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
-                
-                $(this.elements[2]).css('visibility' , 'visible');
-                $(this.elements[2]).animate({left:board.leftpart - 40} , this.moveanimtime);
-                
                 $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
                 
-                $(this.elements[3]).css('visibility' , 'visible');
-                $(this.elements[3]).animate({left:board.leftpart + 40} , this.moveanimtime);
+                // меняем положение от левого края доп. костей
+                $(this.elements[2]).css('left' , board.leftpart - 40);
+                $(this.elements[3]).css('left' , board.leftpart + 40);
+                
+                // после анимации 
+                setTimeout(function() {
+                    // показываем дополнительные кости
+                    $(self.elements[2]).css('visibility' , 'visible');
+                    $(self.elements[3]).css('visibility' , 'visible');
+                    
+                    // и смещаем их вниз
+                    $(self.elements[2]).animate({top:bone1pos.top + 80} , 30);
+                    $(self.elements[3]).animate({top:bone1pos.top + 80} , 30);
+                    
+                }, this.moveanimtime);
             // перемещение вправо
             }else if(side === 'right'){
                 $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
-                
-                $(this.elements[2]).css('visibility' , 'visible');
-                $(this.elements[2]).animate({left:board.rightpart - 40} , this.moveanimtime);
-                
                 $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
                 
-                $(this.elements[3]).css('visibility' , 'visible');
-                $(this.elements[3]).animate({left:board.rightpart + 40} , this.moveanimtime);
+                $(this.elements[2]).css('left' , board.rightpart - 40);
+                $(this.elements[3]).css('left' , board.rightpart + 40);
+                
+                setTimeout(function(){
+                     // показываем дополнительные кости
+                    $(self.elements[2]).css('visibility' , 'visible');
+                    $(self.elements[3]).css('visibility' , 'visible');
+                    
+                    // и смещаем их вниз
+                    $(self.elements[2]).animate({top:bone1pos.top + 80} , 30);
+                    $(self.elements[3]).animate({top:bone1pos.top + 80} , 30);
+                } , this.moveanimtime);
+                
             }else{console.error('Неверное значение для перемещения фишек');}
         break;
     }
 };
 
 Bones.prototype.shake = function(bone , timeAnim , boneval){
-    var selector = $(this.elements[bone]);
+    var selector;
+    
+    if(typeof(bone) === 'object'){
+        selector = '';
+        for(var i = 0; i < bone.length; i++){
+            if(i !== bone.length - 1){
+                selector += this.elements[bone[i]] + ',';
+            }else{
+                selector += this.elements[bone[i]];
+            }
+        }
+        
+        console.log('selector: ' , selector);
+        
+        selector =  $(selector);
+    }else{
+        selector = $(this.elements[bone]);
+    }
+    
     selector.css('visibility' , 'visible');
     
     selector.addClass("active").attr('data-value' , boneval);
@@ -138,10 +178,13 @@ Bones.prototype.animateStepBones = function(bones , side){
     
     setTimeout(function(){
         if(bones[0] === bones[1]){
+            self.shake([0 , 1 , 2 , 3] , self.shaketime , bones[1]);
+            /*
             self.shake(0 , self.shaketime , bones[1]);
             self.shake(1 , self.shaketime , bones[1]);
             self.shake(2 , self.shaketime , bones[1]);
             self.shake(3 , self.shaketime , bones[1]);
+            */
         }else{
             self.shake(0 , self.shaketime , bones[0]);
             self.shake(1 , self.shaketime , bones[1]);
