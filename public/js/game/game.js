@@ -22,6 +22,7 @@ Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
 Game.prototype.piececolor   = '';       // white || black
 Game.prototype.sendstep     = 'every';  // every || all - передавать шаги каждый/все
+Game.prototype.gamedialog   = '#gamedialog';
 
 // timers
 Game.prototype.timelot      = 3000; // общее время жеребьевки
@@ -33,11 +34,13 @@ Game.prototype.countsteps   = 0;
 Game.prototype.takehead     = [];
 Game.prototype.endstep      = false;
 Game.prototype.inhouse      = 0;
+Game.prototype.gamefinish   = false;
 
 Game.prototype.self         = {};
 Game.prototype.enemy        = {};
 Game.prototype.imageObjects = {};
 Game.prototype.light        = {};
+Game.prototype.timer        = {};
 
 Game.prototype.step         = {
     player      : ''        ,   // self || enemy 
@@ -59,6 +62,55 @@ Game.prototype.selectedpiece = false;
 */
 Game.prototype.setMessage = function(message){
     $(this.meselement).html(message);
+};
+
+/* Очищаем данные текущей игры */
+Game.prototype.clearGame = function(){
+    var self = this;
+    
+    if($(self.gamedialog).hasClass('ui-dialog-content')){
+        $(self.gamedialog).dialog('close');
+    }
+    
+    
+    // чистим таймер
+    clearInterval(self.timer);
+    
+    // уничтожаем фишки    
+    if(this.pieces.length !== 0){
+        for(var i = 0; i < this.pieces.length; i++){
+            this.pieces[i].obj.destroy();
+            this.board.stage.batchDraw();
+        }
+        this.pieces = [];
+    }
+    
+    // удаляем инфорацию о располажении фишек
+    for(var i = 0; i < this.board.fields.length; i++){
+        this.board.fields[i].pieces = [];
+    }
+    
+    this.step.steps = [];
+    this.step.send  = [];
+    this.rules.step = {};
+    this.rules.prehouse = false;
+    
+    this.rules.controllhead = true;
+    this.rules.takehead     = [];
+    
+    this.type = 'long';
+    
+    this.side         = '';
+    this.piececolor   = '';
+    
+    this.countsteps   = 0;
+    this.takehead     = [];
+    this.endstep      = false;
+    this.inhouse      = 0;
+    
+    this.enemy        = {};
+    this.light        = {};
+    this.timer        = {};
 };
 
 /*
@@ -731,16 +783,130 @@ Game.prototype.activatePieces = function(){
     
     } // inhouse
     else{
-        this.actionDialog('finish_dialog');
+        if(this.board.fields[1].pieces.length === 15){
+            this.actionDialog('win');
+        }else{
+            this.inhouse = this.board.fields[1].pieces.length;
+            this.activatePieces();
+        }
     }
 };
 
+Game.prototype.sendReInvite = function(){
+    this.sendRequest('reinvitePlayer' , {});
+};
+
+Game.prototype.endInvite = function(){
+    this.actionDialog('endReInvite');
+};
+
+Game.prototype.getReInvite = function(){
+    console.log('Получен запрос приглашения переиграть');
+    this.actionDialog('reinviting');
+};
+
+Game.prototype.acceptReInvite = function(){
+    console.log('Отправляем подтверждение переиграть');
+    this.sendRequest('giveConfirmReInvate' , {});
+};
+
+Game.prototype.cancelReInvite = function(){
+    console.log('Отправляем отказ от переигрывания')
+    this.sendRequest('giveCancelReInvate' , {});
+};
+
+Game.prototype.takeCancelReInvite = function(){
+    console.log('Получена метка отказа переигрывать')
+    this.actionDialog('cancelReInvite');
+};
+
 Game.prototype.actionDialog = function(type){
-    var finish_dialog = $('#finish_dialog');
+    var finish_dialog = $('#gamedialog');
+    var self = this;
+    
 	
 	switch (type) {
+	    case 'endReInvite' :
+	        finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Закрыть' : function(){
+                        $(this).dialog('close');
+                    }
+                } ,
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+            
+            finish_dialog.html('Соперник соперник не отвечает на ваш запрос');
+	        
+	        break;
+	    
+	    case 'cancelReInvite' :
+	        finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Закрыть' : function(){
+                        $(this).dialog('close');
+                    }
+                } ,
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+            
+            finish_dialog.html('Соперник отклонил приглашение сыграть еще раз');
+            clearInterval(this.timer);
+	        
+	        break;
+	    
+	    // окно от соперника сыграть еще раз
+	    case 'reinviting' :
+	        finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Принять'  : function(){
+                        $(this).dialog('close');
+                        self.acceptReInvite();
+                    } ,
+                    'Отменить' : function(){
+                        $(this).dialog('close');
+                        self.cancelReInvite();
+                    }
+                } ,
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+            
+            finish_dialog.html('Вас пригласили сыграть еще раз.<br /><div id="timer"></div>');
+	        
+	        break;
+	    
+	    // окно появляется после приглашения сыграть соперника еще раз
+	    case 'inviteReplay' :
+	        finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Отменить' : function(){
+                        $(this).dialog('close');
+                        clearTimeout(self.timer);
+                    }
+                } ,
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+            finish_dialog.html('Вы пригласили соперника сыграть еще раз.<br /><div id="timer"></div>');
+	        this.sendReInvite();
+	        this.countDown(function(){self.endInvite();} , $('#timer') , 30);
+	        
+	        break;
+	    
 	    // показываем диалоговое окно победителю
 	    case 'win':
+	        console.info('open dialog win');
             finish_dialog.dialog({
                 modal : false ,
                 buttons : {
@@ -749,6 +915,7 @@ Game.prototype.actionDialog = function(type){
                     } ,
                     'Начать сначала' : function(){
                         $(this).dialog('close');
+                        self.actionDialog('inviteReplay');
                     }
                 } ,
                 minWidth : 500
@@ -762,7 +929,9 @@ Game.prototype.actionDialog = function(type){
             this.endGame();
 	        break;
 	        
+	    // показывеам окно проигравшему игроку
         case 'lose' :
+            console.log('Открываем окно проигрыша')
             finish_dialog.dialog({
                 modal : false ,
                 buttons : {
@@ -771,6 +940,7 @@ Game.prototype.actionDialog = function(type){
                     } ,
                     'Начать сначала' : function(){
                         $(this).dialog('close');
+                        self.actionDialog('inviteReplay');
                     }
                 } ,
                 minWidth : 500
@@ -781,7 +951,7 @@ Game.prototype.actionDialog = function(type){
             finish_dialog.html('Вы проиграли');
             
             // закругляем игру
-            this.endGame();
+            //this.endGame();
 	        break;
 	    
 	    default:
@@ -790,14 +960,17 @@ Game.prototype.actionDialog = function(type){
 };
 
 Game.prototype.endGame = function(){
-    // блокируем фишки
-    this.blockedPieces();
     // скрываем кости
+    this.gamefinish = true;
+    
     this.bones.hideBones();
     if(this.inhouse === 15){
+        // блокируем фишки
+        this.blockedPieces();
         // отправляем сопернику сообщение о конце игры
         this.sendRequest('sendLose' , {});
     }else{
+        console.log('Получена пометка о проигрыше');
         this.actionDialog('lose');
     }
 };
@@ -1610,6 +1783,14 @@ Game.prototype.calcPoints = function(){
 Game.prototype.takeGameData = function(data){
     var self = this;
     
+    if(this.gamefinish){
+        console.log('gamefinish true!' , this.gamefinish);
+        
+        // на всякий случай очищаем данные об игре
+        this.clearGame();
+        this.gamefinish = false;
+    }
+    
     if(typeof(data) === 'object'){
         if(
                 'id'         in data
@@ -1703,6 +1884,12 @@ Game.prototype.animateLot = function(lots){
     var self        = this;
     var shaketime   = this.timelot / 6;
     
+    // осветляем на всякий случай
+    $(this.bones.elements[0]).css('opacity' , 1);
+    $(this.bones.elements[1]).css('opacity' , 1);
+    $(this.bones.elements[2]).css('opacity' , 1);
+    $(this.bones.elements[3]).css('opacity' , 1);
+    
     this.setMessage('Игрок подключен. Идет жеребьевка');
 
     // меням сторону расположения кости
@@ -1729,6 +1916,7 @@ Game.prototype.animateLot = function(lots){
     # Таймер обратного отсчета
 */
 Game.prototype.countDown = function(callback , element ,second,endMinute,endHour,endDay,endMonth,endYear) {
+    var self = this;
     var now = new Date();
     second = second || now.getSeconds();
     second = second + now.getSeconds();
@@ -1739,10 +1927,10 @@ Game.prototype.countDown = function(callback , element ,second,endMinute,endHour
     endMinute = endMinute || now.getMinutes();
     //добавляем секунду к конечной дате (таймер показывает время уже спустя 1с.) 
     var endDate = new Date(endYear,endMonth,endDay,endHour,endMinute,second+1); 
-    var interval = setInterval(function() { //запускаем таймер с интервалом 1 секунду
+    this.timer = setInterval(function() { //запускаем таймер с интервалом 1 секунду
         var time = endDate.getTime() - now.getTime();
         if (time < 0) {                      //если конечная дата меньше текущей
-            clearInterval(interval);
+            clearInterval(self.timer);
             alert("Неверная дата!");            
         } else {            
             var days = Math.floor(time / 864e5);
@@ -1763,7 +1951,7 @@ Game.prototype.countDown = function(callback , element ,second,endMinute,endHour
             element.html('Ожидание ответа ' + seconds);
             
             if (!seconds && !minutes && !days && !hours) {              
-                clearInterval(interval);
+                clearInterval(self.timer);
                 
                 callback();
             }           

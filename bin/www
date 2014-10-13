@@ -131,7 +131,48 @@ io.on('connection' , function(socket){
     });
     
     socket.on('sendLose' , function(data){
+        debug('Отправляем игроку пометку о проигрыше');
         games.sendEnemyData(user.id , 'finishGame' , {});
+    });
+    
+    socket.on('reinvitePlayer' , function(data){
+        debug('Отправляем сопернику приглашение сыгарть еще раз');
+        games.sendEnemyData(user.id , 'takeReInvite' , {});
+    });
+    
+    socket.on('giveCancelReInvate' , function(data){
+        debug('Отправляем пометку об отказе переигрывать');
+        games.sendEnemyData(user.id , 'takeCancelReInvite' , {});
+    });
+    
+    // оба игрока решили сыграть еще раз
+    socket.on('giveConfirmReInvate' , function(data){
+        debug('Отправляем подтверждение переиграть');
+        
+        // Генерируем идентификаторы фишек
+        game.generatePieces();
+                
+        // Генерируем значение лотовых костей
+        var lotbones = game.generateLotBones();
+        // Генерируем зачение шаговых костей
+        game.generateBones();
+        
+        var gamedata = games.playersdata[user.id];
+        
+        // Отправляем данные созданной игры
+        games.sendEnemyData(user.id , 'takeGameData' , {
+            id          : user.id ,
+            pieces      : game.pieces ,
+            bones       : game.bones ,
+            lotbones    : [ lotbones[1] , lotbones[0] ]
+        });
+        
+        games.sendSelfData(user.id , 'takeGameData' , {
+            id          : gamedata.enemyid , 
+            pieces      : game.pieces , 
+            bones       : game.bones , 
+            lotbones    : [ lotbones[0] , lotbones[1] ]
+        });
     });
     
     /*
