@@ -62,6 +62,13 @@ Bones.prototype.hideDop = function(){
     $(this.elements[3]).css('visibility' , 'hidden');
 };
 
+Bones.prototype.hideBones = function(){
+    $(this.elements[0]).css('visibility' , 'hidden');
+    $(this.elements[1]).css('visibility' , 'hidden');
+    $(this.elements[2]).css('visibility' , 'hidden');
+    $(this.elements[3]).css('visibility' , 'hidden');
+};
+
 /*
     # Функция анимированно перемещает указнные фишки в 
     # нужную часть

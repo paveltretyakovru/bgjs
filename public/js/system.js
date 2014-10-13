@@ -36,6 +36,8 @@ $(document).ready(function(){
             
             // получаем указания болтать кости
             window.game.setListener('takeBones' , 'Game' , 'takeBones');
+            
+            window.game.setListener('finishGame' , 'Game' , 'endGame');
         });
         
         

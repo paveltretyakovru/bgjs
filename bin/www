@@ -130,6 +130,10 @@ io.on('connection' , function(socket){
         }
     });
     
+    socket.on('sendLose' , function(data){
+        games.sendEnemyData(user.id , 'finishGame' , {});
+    });
+    
     /*
         # Отключение пользователя 
         #

@@ -731,18 +731,74 @@ Game.prototype.activatePieces = function(){
     
     } // inhouse
     else{
-        $('#finish_dialog').html('<p><h3>Поздравляем! Вы одержали победу</h3><p>');
-        $('#finish_dialog').dialog({
-            modal : true ,
-            buttons : {
-                'Закрыть' : function(){
-                    $(this).dialog('close');
+        this.actionDialog('finish_dialog');
+    }
+};
+
+Game.prototype.actionDialog = function(type){
+    var finish_dialog = $('#finish_dialog');
+	
+	switch (type) {
+	    // показываем диалоговое окно победителю
+	    case 'win':
+            finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Закрыть' : function(){
+                        $(this).dialog('close');
+                    } ,
+                    'Начать сначала' : function(){
+                        $(this).dialog('close');
+                    }
                 } ,
-                'Начать сначала' : function(){
-                    $(this).dialog('close');
-                }
-            }
-        });
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+        	        
+            finish_dialog.html('Поздравляем! Вы выиграли!');
+            
+            // закругляем игру
+            this.endGame();
+	        break;
+	        
+        case 'lose' :
+            finish_dialog.dialog({
+                modal : false ,
+                buttons : {
+                    'Закрыть' : function(){
+                        $(this).dialog('close');
+                    } ,
+                    'Начать сначала' : function(){
+                        $(this).dialog('close');
+                    }
+                } ,
+                minWidth : 500
+            });
+        	        
+            $('.ui-dialog-titlebar').remove();
+        	        
+            finish_dialog.html('Вы проиграли');
+            
+            // закругляем игру
+            this.endGame();
+	        break;
+	    
+	    default:
+	        console.error('Undefined dialog type');
+	}
+};
+
+Game.prototype.endGame = function(){
+    // блокируем фишки
+    this.blockedPieces();
+    // скрываем кости
+    this.bones.hideBones();
+    if(this.inhouse === 15){
+        // отправляем сопернику сообщение о конце игры
+        this.sendRequest('sendLose' , {});
+    }else{
+        this.actionDialog('lose');
     }
 };
 
@@ -1667,6 +1723,53 @@ Game.prototype.animateLot = function(lots){
             self.setMessage('Жеребьевка окончена. Ваш ход');
         }
     }, shaketime);
+};
+
+/*
+    # Таймер обратного отсчета
+*/
+Game.prototype.countDown = function(callback , element ,second,endMinute,endHour,endDay,endMonth,endYear) {
+    var now = new Date();
+    second = second || now.getSeconds();
+    second = second + now.getSeconds();
+    endYear =  endYear || now.getFullYear();            
+    endMonth = endMonth ? endMonth - 1 : now.getMonth();   //номер месяца начинается с 0
+    endDay = endDay || now.getDate();
+    endHour = endHour || now.getHours() ;
+    endMinute = endMinute || now.getMinutes();
+    //добавляем секунду к конечной дате (таймер показывает время уже спустя 1с.) 
+    var endDate = new Date(endYear,endMonth,endDay,endHour,endMinute,second+1); 
+    var interval = setInterval(function() { //запускаем таймер с интервалом 1 секунду
+        var time = endDate.getTime() - now.getTime();
+        if (time < 0) {                      //если конечная дата меньше текущей
+            clearInterval(interval);
+            alert("Неверная дата!");            
+        } else {            
+            var days = Math.floor(time / 864e5);
+            var hours = Math.floor(time / 36e5) % 24; 
+            var minutes = Math.floor(time / 6e4) % 60;
+            var seconds = Math.floor(time / 1e3) % 60;  
+            
+            /*
+            var digit='<div style="width:70px;float:left;text-align:center">'+
+            '<div style="font-family:Stencil;font-size:65px;">';
+            var text='</div><div>'
+            var end='</div></div><div style="float:left;font-size:45px;">:</div>'
+            document.getElementById('mytimer').innerHTML = '<div>осталось: </div>'+
+            digit+days+text+'Дней'+end+digit+hours+text+'Часов'+end+
+            digit+minutes+text+'Минут'+end+digit+seconds+text+'Секунд';
+            */
+            
+            element.html('Ожидание ответа ' + seconds);
+            
+            if (!seconds && !minutes && !days && !hours) {              
+                clearInterval(interval);
+                
+                callback();
+            }           
+        }
+        now.setSeconds(now.getSeconds() + 1); //увеличиваем текущее время на 1 секунду
+    }, 1000);
 };
 
 Game.prototype.loadImages = function(callback){
