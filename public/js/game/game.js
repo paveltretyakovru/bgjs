@@ -54,7 +54,7 @@ Game.prototype.step         = {
     side        : 'left'    ,   // left || right
     steps       : []        ,
     points      : 0         ,
-    send        : []            // массив для отправки хода сопернику
+    send        : []        ,   // массив для отправки хода сопернику
 };
 
 // global vars
@@ -904,25 +904,29 @@ Game.prototype.finishSteps = function(){
     var self = this;
     console.info('Закончился ход');
     this.setMessage('Передача хода');
-    
-    // указываем, что ход завершился
-    this.endstep = true;
-    
-    setTimeout(function() {
-        self.setMessage('Ход соперника');
-    }, 1000);
-    
-    this.blockedPieces();
-    
-    this.bones.lightControll(this.step.steps , true);
-    this.bones.hideDop();
-    
-    // указываем, что сейчас ходит соперник
-    this.step.player = 'enemy';
-    // меняем сторону хода
-    this.step.side   = (this.step.side === 'left') ? 'right' : 'left';
-    // отрпавляем указание сопернику начать ход
-    this.sendRequest('transferStepEnd' , true);
+    if(!this.endstep){
+        // указываем, что ход завершился
+        this.endstep = true;
+        
+        setTimeout(function() {
+            self.setMessage('Ход соперника');
+        }, 1000);
+        
+        this.blockedPieces();
+        
+        this.bones.lightControll(this.step.steps , true);
+        this.bones.hideDop();
+        
+        // указываем, что сейчас ходит соперник
+        this.step.player = 'enemy';
+        // меняем сторону хода
+        this.step.side   = (this.step.side === 'left') ? 'right' : 'left';
+        // отрпавляем указание сопернику начать ход
+        this.sendRequest('transferStepEnd' , {
+            fields      : this.board.fields ,
+            controll    : true}
+        );
+    }
 };
 
 Game.prototype.stepBegin = function(data){
@@ -995,7 +999,7 @@ Game.prototype.takeStep = function(data){
                 this.checkPiecesPosition();
                 
             }else{
-                console.error('Переданы не все параметры для отображения хода');
+                console.error('Переданы не все параметры для отображения хода' , data);
             }
             break;
         
@@ -1264,6 +1268,10 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     // вычисляем поле, на которое может сходить фишка
     var movefield   = this.rules.calcMove(oldfield , newfield , piece.id);
     
+    if(this.endstep){
+        movefield = oldfield;
+    }
+    
     // если фишку перетянули из дома
     if(oldfield === 1){
         this.rules.controllhead = false;
@@ -1329,16 +1337,16 @@ Game.prototype.endDrag = function(piece){
     this.blockedPieces();
     
     if(!this.endstep){
-    // передаем ход
-    this.giveStep();
-    
-    this.bones.lightControll(this.step.steps , false);
-    
-    // проверяем, все ли фишки находятся на своем месте
-    this.checkPiecesPosition();
-    
-    // пересчитываем и переактивируем новые фишки
-    this.activatePieces();
+        // передаем ход
+        this.giveStep();
+        
+        this.bones.lightControll(this.step.steps , false);
+        
+        // проверяем, все ли фишки находятся на своем месте
+        this.checkPiecesPosition();
+        
+        // пересчитываем и переактивируем новые фишки
+        this.activatePieces();
     }
 };
 
@@ -1351,7 +1359,9 @@ Game.prototype.giveStep = function(){
         case 'every':
             // отрпавляем данные хода
             if(this.step.send.length !== 0){
-                this.sendRequest('transferStep' , this.step.send);
+                //if(!this.endstep){
+                    this.sendRequest('transferStep' , this.step.send);
+                //}
             }
             
             // очищаем данные хода
@@ -1735,7 +1745,7 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 2];
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
-                //this.step.bones = [1 , 2];  // restep test
+                this.step.bones = [1 , 2];  // restep test
                 //this.step.bones = [1 , 5];
                 
                 // Анимируем жеребьевку

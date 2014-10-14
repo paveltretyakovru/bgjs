@@ -37,9 +37,9 @@ $(document).ready(function(){
             // получаем указания болтать кости
             window.game.setListener('takeBones' , 'Game' , 'takeBones');
             
+            // концовочка хода
             window.game.setListener('finishGame' , 'Game' , 'endGame');
             window.game.setListener('takeReInvite' , 'Game' , 'getReInvite');
-            window.game.setListener('takeCancelReInvite' , 'Game' , 'takeCancelReInvite');
         });
         
         
