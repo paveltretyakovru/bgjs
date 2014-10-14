@@ -189,6 +189,8 @@ Rules.prototype.blockRule = function(oldfield , newfield){
                 // значит можно ставить блок
                 console.log('Впереди стоит фишка соперника, значит можно ставить блок');
                 return true;
+            }else{
+                emptycontroll = false;
             }
         }
         
@@ -374,6 +376,18 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     result = this.handleRules(oldfield , num2 , boneval);
                     if(result){
                         can2 = num2;
+                    }else{
+                        /*
+                            # Либо делаем ход на вторую кость классически :-)
+                        */
+                        
+                        boneval = this.step.steps[1][0];
+                        num2 = this.checkFieldNum(this.step.steps[1][0] + oldfield);
+                        
+                        result = this.handleRules(oldfield , num2 , boneval);
+                        if(result){
+                            can2 = num2;
+                        }
                     }
                 }
             }else{
