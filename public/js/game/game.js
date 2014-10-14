@@ -36,11 +36,17 @@ Game.prototype.endstep      = false;
 Game.prototype.inhouse      = 0;
 Game.prototype.gamefinish   = false;
 
-Game.prototype.self         = {};
-Game.prototype.enemy        = {};
 Game.prototype.imageObjects = {};
 Game.prototype.light        = {};
 Game.prototype.timer        = {};
+
+Game.prototype.self         = {
+    reinvite    : false
+};
+
+Game.prototype.enemy        = {
+    reinvite : false
+};
 
 Game.prototype.step         = {
     player      : ''        ,   // self || enemy 
@@ -793,31 +799,28 @@ Game.prototype.activatePieces = function(){
 };
 
 Game.prototype.sendReInvite = function(){
-    this.sendRequest('reinvitePlayer' , {});
-};
-
-Game.prototype.endInvite = function(){
-    this.actionDialog('endReInvite');
+    this.self.reinvite = true;
+    
+    if(!this.enemy.reinvite){
+        this.sendRequest('reinvitePlayer' , {});
+        this.setMessage ('Ожидание соперника...');
+    }else{
+        this.sendRequest('giveConfirmReInvate' , {});
+    }
 };
 
 Game.prototype.getReInvite = function(){
     console.log('Получен запрос приглашения переиграть');
-    this.actionDialog('reinviting');
+    if(this.self.reinvite){
+        this.acceptReInvite();
+    }else{
+        this.enemy.reinvite = true;
+    }
 };
 
 Game.prototype.acceptReInvite = function(){
     console.log('Отправляем подтверждение переиграть');
     this.sendRequest('giveConfirmReInvate' , {});
-};
-
-Game.prototype.cancelReInvite = function(){
-    console.log('Отправляем отказ от переигрывания')
-    this.sendRequest('giveCancelReInvate' , {});
-};
-
-Game.prototype.takeCancelReInvite = function(){
-    console.log('Получена метка отказа переигрывать')
-    this.actionDialog('cancelReInvite');
 };
 
 Game.prototype.actionDialog = function(type){
@@ -826,99 +829,21 @@ Game.prototype.actionDialog = function(type){
     
 	
 	switch (type) {
-	    case 'endReInvite' :
-	        finish_dialog.dialog({
-                modal : false ,
-                buttons : {
-                    'Закрыть' : function(){
-                        $(this).dialog('close');
-                    }
-                } ,
-                minWidth : 500
-            });
-        	        
-            $('.ui-dialog-titlebar').remove();
-            
-            finish_dialog.html('Соперник соперник не отвечает на ваш запрос');
-	        
-	        break;
-	    
-	    case 'cancelReInvite' :
-	        finish_dialog.dialog({
-                modal : false ,
-                buttons : {
-                    'Закрыть' : function(){
-                        $(this).dialog('close');
-                    }
-                } ,
-                minWidth : 500
-            });
-        	        
-            $('.ui-dialog-titlebar').remove();
-            
-            finish_dialog.html('Соперник отклонил приглашение сыграть еще раз');
-            clearInterval(this.timer);
-	        
-	        break;
-	    
-	    // окно от соперника сыграть еще раз
-	    case 'reinviting' :
-	        finish_dialog.dialog({
-                modal : false ,
-                buttons : {
-                    'Принять'  : function(){
-                        $(this).dialog('close');
-                        self.acceptReInvite();
-                    } ,
-                    'Отменить' : function(){
-                        $(this).dialog('close');
-                        self.cancelReInvite();
-                    }
-                } ,
-                minWidth : 500
-            });
-        	        
-            $('.ui-dialog-titlebar').remove();
-            
-            finish_dialog.html('Вас пригласили сыграть еще раз.<br /><div id="timer"></div>');
-	        
-	        break;
-	    
-	    // окно появляется после приглашения сыграть соперника еще раз
-	    case 'inviteReplay' :
-	        finish_dialog.dialog({
-                modal : false ,
-                buttons : {
-                    'Отменить' : function(){
-                        $(this).dialog('close');
-                        clearTimeout(self.timer);
-                    }
-                } ,
-                minWidth : 500
-            });
-        	        
-            $('.ui-dialog-titlebar').remove();
-            finish_dialog.html('Вы пригласили соперника сыграть еще раз.<br /><div id="timer"></div>');
-	        this.sendReInvite();
-	        this.countDown(function(){self.endInvite();} , $('#timer') , 30);
-	        
-	        break;
-	    
 	    // показываем диалоговое окно победителю
 	    case 'win':
 	        console.info('open dialog win');
             finish_dialog.dialog({
-                modal : false ,
+                modal : true ,
                 buttons : {
                     'Закрыть' : function(){
                         $(this).dialog('close');
                     } ,
                     'Начать сначала' : function(){
                         $(this).dialog('close');
-                        self.actionDialog('inviteReplay');
+                        self.sendReInvite();
                     }
                 } ,
-                minWidth : 500
+                minWidth : 400
             });
         	        
             $('.ui-dialog-titlebar').remove();
@@ -933,17 +858,17 @@ Game.prototype.actionDialog = function(type){
         case 'lose' :
             console.log('Открываем окно проигрыша')
             finish_dialog.dialog({
-                modal : false ,
+                modal : true ,
                 buttons : {
                     'Закрыть' : function(){
                         $(this).dialog('close');
                     } ,
                     'Начать сначала' : function(){
                         $(this).dialog('close');
-                        self.actionDialog('inviteReplay');
+                        self.sendReInvite();
                     }
                 } ,
-                minWidth : 500
+                minWidth : 400
             });
         	        
             $('.ui-dialog-titlebar').remove();

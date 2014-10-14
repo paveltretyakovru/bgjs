@@ -1,5 +1,6 @@
 var Bones = function(selector){
     this.selector = $(selector);
+    $('#die1 , #die2 , #die3 , #die4').css('z-index' , 1);
 };
 
 Bones.prototype.elements    = ['#die1' , '#die2' , '#die3' , '#die4'];
