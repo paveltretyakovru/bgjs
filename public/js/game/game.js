@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -1091,8 +1091,18 @@ Game.prototype.setClicksPiece = function(node , oldfield){
                             );
                             
         // если фишку перетянули из дома
+        // если фишку перетянули из дома
         if(oldfield === 1){
-            self.rules.controllhead = false;
+            if(this.rules.takehead.length === 2){
+                var tmplast = this.getLastPieces(1 , 1)
+                if(this.rules.takehead.indexOf(tmplast[0].id) !== -1){
+                    this.rules.controllhead = true;
+                }else{
+                    this.rules.controllhead = false;
+                }
+            }else{
+                this.rules.controllhead = false;            
+            }        
         }
         
         // если фишку перещаем в дом
@@ -1274,7 +1284,16 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     
     // если фишку перетянули из дома
     if(oldfield === 1){
-        this.rules.controllhead = false;
+        if(this.rules.takehead.length === 2){
+            var tmplast = this.getLastPieces(1 , 1)
+            if(this.rules.takehead.indexOf(tmplast[0].id) !== -1){
+                this.rules.controllhead = true;
+            }else{
+                this.rules.controllhead = false;
+            }
+        }else{
+            this.rules.controllhead = false;            
+        }        
     }
     
     // если фишку перещаем в дом
@@ -1454,10 +1473,20 @@ Game.prototype.setClickBoard = function(){
                                     self.selectedpiece.id() ,
                                     true
                                 );
-                                
+            
+            
             // если фишку перетянули из дома
             if(selectedpos[0] === 1){
-                self.rules.controllhead = false;
+                if(self.rules.takehead.length === 2){
+                    var tmplast = self.getLastPieces(1 , 1)
+                    if(self.rules.takehead.indexOf(tmplast[0].id) !== -1){
+                        self.rules.controllhead = true;
+                    }else{
+                        self.rules.controllhead = false;
+                    }
+                }else{
+                    self.rules.controllhead = false;            
+                }        
             }
             
             // если можно сходить по кликанному полю
@@ -1745,8 +1774,8 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 2];
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
-                this.step.bones = [1 , 2];  // restep test
-                //this.step.bones = [1 , 5];
+                //this.step.bones = [1 , 2];  // restep test
+                this.step.bones = [4 , 4];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);

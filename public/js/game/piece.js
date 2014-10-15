@@ -88,6 +88,8 @@ Piece.prototype.moveTo = function( x , y){
 	});
 
 	tween.play();
+	
+	ion.sound.play("piece");
 };
 
 Piece.prototype.x       = 0;

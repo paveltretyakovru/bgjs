@@ -165,6 +165,9 @@ Bones.prototype.shake = function(bone , timeAnim , boneval){
         selector = $(this.elements[bone]);
     }
     
+    ion.sound.play("dice");
+
+    
     selector.css('visibility' , 'visible');
     
     selector.addClass("active").attr('data-value' , boneval);

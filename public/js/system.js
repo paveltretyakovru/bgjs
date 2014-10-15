@@ -49,6 +49,16 @@ $(document).ready(function(){
     	rand = Math.round(rand);
     	return rand;
     }
+    
+    ion.sound({
+        sounds: [
+            {name: "dice"} ,
+            {name: "piece"}
+        ],
+        path: "sounds/",
+        preload: true,
+        volume: 1.0
+     });
 });
 
 
