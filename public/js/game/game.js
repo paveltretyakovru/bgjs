@@ -1093,15 +1093,15 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         // если фишку перетянули из дома
         // если фишку перетянули из дома
         if(oldfield === 1){
-            if(this.rules.takehead.length === 2){
-                var tmplast = this.getLastPieces(1 , 1)
-                if(this.rules.takehead.indexOf(tmplast[0].id) !== -1){
-                    this.rules.controllhead = true;
+            if(self.rules.takehead.length === 2){
+                var tmplast = self.getLastPieces(1 , 1)
+                if(self.rules.takehead.indexOf(tmplast[0].id) !== -1){
+                    self.rules.controllhead = true;
                 }else{
-                    this.rules.controllhead = false;
+                    self.rules.controllhead = false;
                 }
             }else{
-                this.rules.controllhead = false;            
+                self.rules.controllhead = false;            
             }        
         }
         
@@ -1144,7 +1144,9 @@ Game.prototype.addHistoryPieces = function(pieces){
                 }
             }
             if(!have){
-                pieces.push(hp);
+                if(hp.field !== 1){
+                    pieces.push(hp);
+                }
             }
         }
     }
