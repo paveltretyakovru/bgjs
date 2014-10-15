@@ -660,14 +660,20 @@ Game.prototype.calcCan = function(){
     for(var field = 1; field < this.board.fields.length; field++){
         // если поле содержит фишки
         if(this.board.fields[field].pieces.length !== 0){
-            // является ли поле игрока
-            if(this.myField(field)){
-                var canmove = this.rules.canMove(field);
-                // если поле может ходить
-                if(canmove){
-                    countcanmove++;
-                    canarray.push(field);
+            
+            // проверять дом на возможность хода не нужно
+            if(!this.rules.inhouse && field !== 1){
+            
+                // является ли поле игрока
+                if(this.myField(field)){
+                    var canmove = this.rules.canMove(field);
+                    // если поле может ходить
+                    if(canmove){
+                        countcanmove++;
+                        canarray.push(field);
+                    }
                 }
+            
             }
         }
     }
