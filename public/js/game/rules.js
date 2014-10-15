@@ -199,7 +199,9 @@ Rules.prototype.blockRule = function(oldfield , newfield){
         for(var i = newfield-1; i >= 1; i--){
             if(this.game.myField(i)){
                 if(emptycontroll) backcontroll++;
-            }else if(this.board.fields[i].pieces.length === 0){
+            }else if(this.board.fields[i].pieces.length !== 0){
+                emptycontroll = false;
+            }else{
                 emptycontroll = false;
             }
         }
@@ -365,6 +367,19 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     if(result){
                         can2        = num2;
                         stepover    = true;
+                    }else{                        
+                        /*
+                            # Либо делаем ход на вторую кость классически :-)
+                        */
+                        
+                        boneval = this.step.steps[1][0];
+                        num2 = this.checkFieldNum(this.step.steps[1][0] + oldfield);
+                        
+                        result = this.handleRules(oldfield , num2 , boneval);
+                        if(result){
+                            console.log('step2');
+                            can2 = num2;
+                        }
                     }
                 }else{
                     /*
@@ -752,11 +767,18 @@ Rules.prototype.canMove = function ( field ) {
         // может ли сходить на сумму костей
         if(this.step.steps[1][1] === 0 && this.step.steps[0][1] === 0){
             boneval = this.step.steps[0][0] + this.step.steps[1][0];
-            result = this.handleRules(
+            
+            if(this.handleRules(field , this.checkFieldNum(this.step.steps[0][0] + field) , boneval) ||
+            this.handleRules(field , this.checkFieldNum(this.step.steps[1][0] + field) , boneval)            
+            ){
+                result = this.handleRules(
                     field , 
                     this.checkFieldNum(this.step.steps[0][0] + this.step.steps[1][0] + field) ,
                     boneval
-                );
+                );                
+            }
+            
+            
         }
         console.log('return true here' , result);
         return result;
