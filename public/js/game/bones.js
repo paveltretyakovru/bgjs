@@ -1,6 +1,6 @@
 var Bones = function(selector){
     this.selector = $(selector);
-    $('#die1 , #die2 , #die3 , #die4').css('z-index' , 1);
+    $('#die1 , #die2 , #die3 , #die4').css('z-index' , 1).draggable();
 };
 
 Bones.prototype.elements    = ['#die1' , '#die2' , '#die3' , '#die4'];
@@ -91,12 +91,12 @@ Bones.prototype.moveToSide = function(bone , side){
                 $(this.elements[2]).css('visibility' , 'hidden');
                 $(this.elements[3]).css('visibility' , 'hidden');
                 
-                $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.leftpart - 40 , top : board.half} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.leftpart + 40 , top : board.half} , this.moveanimtime);
             // перемещение вправо
             }else if(side === 'right'){
-                $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.rightpart - 40 , top : board.half} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.rightpart + 40 , top : board.half} , this.moveanimtime);
             }else{console.error('Неверное значение для перемещения фишек');}
         break;
         
@@ -104,8 +104,8 @@ Bones.prototype.moveToSide = function(bone , side){
             // перемещение в лево
             if(side === 'left'){
                 // перемещаем главные кости
-                $(this.elements[0]).animate({left:board.leftpart - 40} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.leftpart + 40} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.leftpart - 40 , top : board.half} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.leftpart + 40 , top : board.half} , this.moveanimtime);
                 
                 // меняем положение от левого края доп. костей
                 $(this.elements[2]).css('left' , board.leftpart - 40);
@@ -124,8 +124,8 @@ Bones.prototype.moveToSide = function(bone , side){
                 }, this.moveanimtime);
             // перемещение вправо
             }else if(side === 'right'){
-                $(this.elements[0]).animate({left:board.rightpart - 40} , this.moveanimtime);
-                $(this.elements[1]).animate({left:board.rightpart + 40} , this.moveanimtime);
+                $(this.elements[0]).animate({left:board.rightpart - 40 , top : board.half} , this.moveanimtime);
+                $(this.elements[1]).animate({left:board.rightpart + 40 , top : board.half} , this.moveanimtime);
                 
                 $(this.elements[2]).css('left' , board.rightpart - 40);
                 $(this.elements[3]).css('left' , board.rightpart + 40);

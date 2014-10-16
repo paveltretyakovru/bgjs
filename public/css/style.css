@@ -1,6 +1,7 @@
 #container{
     margin     : auto;
-    position: absolute;
+    height: 600px;
+    width: 601px;
 }
 
 #gamestatus{
@@ -50,6 +51,25 @@ div.die{
 	div.die div.face div.pip.bottom{bottom:7.5px;}
 	
 	#die3 .pip , #die4 .pip{width: 5px; height: 5px;}
+
+
+#outbody{
+    height: 50px;
+    width: 600px;
+    margin: auto;
+    background: #fff;
+  }
+
+#outwhite , #outblack{
+  width:100%;
+  height:50%;
+}
+
+#outwhite img , #outblack img{
+	height: 25px;
+	float: left;
+}
+
 
 /* .dice {
     float: left;

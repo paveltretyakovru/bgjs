@@ -84,7 +84,13 @@ Piece.prototype.moveTo = function( x , y){
 		node : self.obj ,
 		duration : self.movetime ,
 		x : x ,
-		y : y
+		y : y ,
+		onFinish : function(){
+		    if(self.house){
+		        self.obj.destroy();
+                self.stage.batchDraw();
+		    }
+		}
 	});
 
 	tween.play();
@@ -102,6 +108,7 @@ Piece.prototype.movetime= 0.5;
 Piece.prototype.id      = '';
 Piece.prototype.type    = '';
 Piece.prototype.color   = '';
+Piece.prototype.house   = false;
 Piece.prototype.last    = false;
 
 Piece.prototype.layer   = {};
