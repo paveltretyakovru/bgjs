@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -613,6 +613,8 @@ Game.prototype.letsRock = function(){
         // Считаем количество ходов
         this.calcPoints();
         
+        this.bones.lightControll( this.step.steps, true);
+        
         // Теперь необходимо активировать возможные фишки
         this.activatePieces();
     }
@@ -853,7 +855,7 @@ Game.prototype.actionDialog = function(type){
 	    case 'win':
 	        console.info('open dialog win');
             finish_dialog.dialog({
-                modal : true ,
+                modal : false ,
                 buttons : {
                     'Закрыть' : function(){
                         $(this).dialog('close');
@@ -878,7 +880,7 @@ Game.prototype.actionDialog = function(type){
         case 'lose' :
             console.log('Открываем окно проигрыша')
             finish_dialog.dialog({
-                modal : true ,
+                modal : false ,
                 buttons : {
                     'Закрыть' : function(){
                         $(this).dialog('close');
@@ -1015,6 +1017,8 @@ Game.prototype.takeStep = function(data){
                         this.outPiece(piece , true);
                     }
                     
+                    this.bones.lightControll(data.steps , false);
+                    
                     // перемещаем фишку
                     piece.moveTo(pos.x , pos.y);
                     
@@ -1137,9 +1141,13 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         // если фишку перещаем в дом
         if(self.rules.prehouse){
             if(movefield >= 1 && movefield <= 6){
+                console.log('TO HOUSE!!!!');
                 movefield = 1;
+                pieceobj.house = true;
             }
         }
+        
+        
         
         // удаляем идентификатор фишки из предыдущей позиции
         var lastpos     = self.calcPiecePos(node.id());
@@ -1575,10 +1583,12 @@ Game.prototype.setClickBoard = function(){
                 var lastpos     = self.calcPiecePos(self.selectedpiece.id());
                 self.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
                 
-                // если фишку перемещаем в дом
+                // если фишку перещаем в дом
                 if(self.rules.prehouse){
                     if(movefield >= 1 && movefield <= 6){
+                        console.log('TO HOUSE!!!!');
                         movefield = 1;
+                        piece.house = true;
                     }
                 }
                 
@@ -1854,7 +1864,7 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
                 //this.step.bones = [1 , 2];  // restep test
-                this.step.bones = [3 , 3];
+                //this.step.bones = [3 , 3];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
