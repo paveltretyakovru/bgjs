@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -800,25 +800,34 @@ Game.prototype.activatePieces = function(){
     
     } // inhouse
     else{
-        
-        var s = 0;
-        
-        if(this.piececolor === 'white'){
-            s = $('#outwhite img').length;
-        }else{
-            s = $('#outblack img').length;
-        }
-        
-        if(s === 15){
+        var contrwin = this.havePieces();
+        if(contrwin.win){
             this.actionDialog('win');
-        }
-        
-        else{
-            this.inhouse = s;
+        } else{
+            this.inhouse = contrwin.inhouse;
             this.activatePieces();
         }
     }
 };
+
+/*
+    # Функция считает количество оставшихся фишек игрока
+*/ 
+Game.prototype.havePieces = function(){
+    var countlast = 0;
+    
+    for(var i = 0; i < this.pieces.length; i++){
+        if(this.pieces[i].color === this.piececolor){
+            countlast++;
+        }
+    }
+    
+    if(countlast > 0){
+        return {win : false , pieces : countlast , inhouse : 15 - countlast};
+    }else{
+        return {win : true , pieces : 0 , inhouse : 15};
+    }
+}
 
 Game.prototype.sendReInvite = function(){
     this.self.reinvite = true;
