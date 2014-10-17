@@ -96,8 +96,8 @@ Game.prototype.clearGame = function(){
         this.board.fields[i].pieces = [];
     }
     
-    $('#outwhite').html();
-    $('#outblack').html();
+    $('#outwhite').html('');
+    $('#outblack').html('');
     
     this.step.steps = [];
     this.step.send  = [];
