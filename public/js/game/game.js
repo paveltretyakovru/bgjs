@@ -869,7 +869,7 @@ Game.prototype.actionDialog = function(type){
                     'Закрыть' : function(){
                         $(this).dialog('close');
                     } ,
-                    'Начать сначала' : function(){
+                    'Да, начать сначала' : function(){
                         $(this).dialog('close');
                         self.sendReInvite();
                     }
@@ -879,7 +879,7 @@ Game.prototype.actionDialog = function(type){
         	        
             $('.ui-dialog-titlebar').remove();
         	        
-            finish_dialog.html('Поздравляем! Вы выиграли!');
+            finish_dialog.html('Поздравляем! Вы выиграли!<br />Начать игру сначала?');
             
             // закругляем игру
             this.endGame();
@@ -894,7 +894,7 @@ Game.prototype.actionDialog = function(type){
                     'Закрыть' : function(){
                         $(this).dialog('close');
                     } ,
-                    'Начать сначала' : function(){
+                    'Да, начать сначала' : function(){
                         $(this).dialog('close');
                         self.sendReInvite();
                     }
@@ -904,7 +904,7 @@ Game.prototype.actionDialog = function(type){
         	        
             $('.ui-dialog-titlebar').remove();
         	        
-            finish_dialog.html('Вы проиграли');
+            finish_dialog.html('Вы проиграли.<br />Начать игру сначала?');
             
             // закругляем игру
             //this.endGame();
