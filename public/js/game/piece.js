@@ -80,9 +80,13 @@ var Piece = function(color , id , layer , stage , type , imageObjects , game , b
 Piece.prototype.moveTo = function( x , y){
     var self = this;
     
+    /* Вычисляем время полета фишек */
+    var d = Math.sqrt( Math.pow(x - this.obj.x() , 2) + Math.pow(y - this.obj.y() , 2) );
+	var movetime = d * 0.002;
+    
     var tween = new Kinetic.Tween({
 		node : self.obj ,
-		duration : self.movetime ,
+		duration : movetime ,
 		x : x ,
 		y : y ,
 		onFinish : function(){

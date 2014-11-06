@@ -43,7 +43,18 @@ div.die{
 	div.die[data-value="4"] div.face[data-id="4"]{display:block;}
 	div.die[data-value="5"] div.face[data-id="5"]{display:block;}
 	div.die[data-value="6"] div.face[data-id="6"]{display:block;}
-	div.die div.face{display:none;}div.die div.face div.pip{width:10px;height:10px;background-color:#222222;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;-moz-background-clip:padding;-webkit-background-clip:padding-box;background-clip:padding-box;position:absolute;}div.die div.face div.pip.left{left:7.5px;}
+	div.die div.face{display:none;}
+	div.die div.face div.pip{
+		width:10px; height:10px; background-color:#222222;
+		-webkit-border-radius:10px;
+		-moz-border-radius:10px;
+		border-radius:10px;
+		-moz-background-clip: padding;
+		-webkit-background-clip:padding-box;
+		background-clip:padding-box;
+		position:absolute;
+	}
+	div.die div.face div.pip.left{left:7.5px;}
 	div.die div.face div.pip.center{left:20px;}
 	div.die div.face div.pip.right{right:7.5px;}
 	div.die div.face div.pip.top{top:7.5px;}

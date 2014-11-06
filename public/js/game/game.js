@@ -16,7 +16,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -26,7 +26,7 @@ Game.prototype.gamedialog   = '#gamedialog';
 
 // timers
 Game.prototype.timelot      = 3000; // общее время жеребьевки
-Game.prototype.cancelStep   = 3000; // время на отмену хода
+Game.prototype.cancelStep   = 0; // время на отмену хода
 Game.prototype.dblclicktime = 200;  // ожидание да двойной клик
 Game.prototype.ruletimemes  = 2000; // время на выведение сообщений системы правил
 
@@ -904,7 +904,7 @@ Game.prototype.actionDialog = function(type){
         	        
             $('.ui-dialog-titlebar').remove();
         	        
-            finish_dialog.html('Поражение.<br />Сыграть еще раз?');
+            finish_dialog.html('Соперник победил.<br />Сыграть еще раз?');
             
             // закругляем игру
             //this.endGame();
@@ -1108,6 +1108,7 @@ Game.prototype.setClicksPiece = function(node , oldfield){
     // если фишка последняя в ряду, то ее можно выделять
     if(pieceobj.last){
     
+    /*
     node.on('click' , function(){
         var node = this;
         if(timer) clearTimeout(timer);
@@ -1116,6 +1117,7 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         }, self.dblclicktime);
         
     });
+    */
     
     // двойной клик по фишке перемещает фишку на минимальное значение
     node.on('dblclick' , function(){

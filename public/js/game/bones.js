@@ -147,6 +147,7 @@ Bones.prototype.moveToSide = function(bone , side){
 
 Bones.prototype.shake = function(bone , timeAnim , boneval){
     var selector;
+    var self = this;
     
     if(typeof(bone) === 'object'){
         selector = '';
@@ -170,8 +171,25 @@ Bones.prototype.shake = function(bone , timeAnim , boneval){
     
     selector.css('visibility' , 'visible');
     
-    selector.addClass("active").attr('data-value' , boneval);
+    /* Вращение костей */
     selector.effect('shake' , timeAnim);
+    
+    selector.rotate({
+      angle:0, 
+      animateTo:self.randomNum(100 , 360) ,
+      step : function(){
+          selector.addClass("active").attr('data-value' , self.randomNum(1 , 6));
+      } ,
+      callback : function(){
+          selector.addClass("active").attr('data-value' , boneval);
+      }
+   });;
+};
+
+Bones.prototype.randomNum = function (min, max){
+    	var rand = min - 0.5 + Math.random()*(max-min+1);
+    	rand = Math.round(rand);
+    	return rand;
 };
 
 Bones.prototype.animateStepBones = function(bones , side){

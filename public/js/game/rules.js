@@ -364,7 +364,12 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , clickboard){
                     num2= this.checkFieldNum(this.step.steps[1][0] + this.step.steps[0][2]);
                     result = this.handleRules(this.step.steps[0][2] , num2 , boneval);
                     
-                    if(result){
+                    /*
+                        # newfield === num2 - изменение, теперь фишка делает перешаг,
+                        # только при условии, что игрок сам навел фишку на поле
+                    */
+                    
+                    if(result && newfield === num2){
                         can2        = num2;
                         stepover    = true;
                     }else{                        
