@@ -17,6 +17,7 @@ Board.prototype.imagey      = 0;
 Board.prototype.pieceheight = 34;
 Board.prototype.topy        = 28;
 Board.prototype.bottomy     = 540;
+Board.prototype.startside   = 'right'
 
 /* empty values */
 Board.prototype.stage       = {};
@@ -51,11 +52,24 @@ Board.prototype.calcLastFieldPos = function(fieldnum){
         var fx  = this.fields[fieldnum].x;
         var y   = 0;
         
-        // определяем y
-        if(fieldnum < 13){
-            y = this.bottomy - lastnum * this.pieceheight;
+        if(this.startside === 'right'){
+        
+            // определяем y
+            if(fieldnum >= 13){
+                y = this.bottomy - lastnum * this.pieceheight;
+            }else{
+                y = this.topy + lastnum * this.pieceheight;
+            }
+        
         }else{
-            y = this.topy + lastnum * this.pieceheight;
+            
+            // определяем y
+            if(fieldnum < 13){
+                y = this.bottomy - lastnum * this.pieceheight;
+            }else{
+                y = this.topy + lastnum * this.pieceheight;
+            }
+            
         }
         
         return { x : fx , y : y };
@@ -75,11 +89,23 @@ Board.prototype.calcPosCoords = function(pos){
         var fx  = this.fields[field].x;
         var y   = 0;
         
-        // определяем y
-        if(field < 13){
-            y = this.bottomy - lastnum * this.pieceheight;
+        if(this.startside === 'right'){
+        
+            // определяем y
+            if(field >= 13){
+                y = this.bottomy - lastnum * this.pieceheight;
+            }else{
+                y = this.topy + lastnum * this.pieceheight;
+            }
+        
         }else{
-            y = this.topy + lastnum * this.pieceheight;
+            
+            // определяем y
+            if(field < 13){
+                y = this.bottomy - lastnum * this.pieceheight;
+            }else{
+                y = this.topy + lastnum * this.pieceheight;
+            }
         }
         
         return { x : fx , y : y };
@@ -113,43 +139,86 @@ Board.prototype.checkCorrectFieldNum = function(fieldnum){
     #
 */
 Board.prototype.calcField = function(x , y){
+    //console.log('CALC FIELD!!!');
     var fields 		= this.fields;
 	var width 		= this.pieceheight / 2 + 5;
 	var top_height 	= this.height / 2;
 	var num 		= 1;
 	
-	for(var i = 1; i < fields.length; i++){
-		if(x <= fields[i].x + width && x >= fields[i].x - width){
-			if(y <= top_height && i >= 13){
-				num = i;
-			}else if(y > top_height && i <= 12){
-				num = i;
-			}
-		}
-	}
+	// если игрок расположен изначально слева
+	if(this.startside === 'left'){
 	
-	if(x > fields[12].x){
-		if(y >= top_height){
-			num = 12;
-		}else{
-			num = 13;
-		}
-	}
-	
-	if(x < fields[1].x){
-		if(y >= top_height){
-			num = 1;
-		}else{
-			num = 24;
-		}
-	}
-	
-	if(x > fields[6].x && x < fields[7].x - 21){
-	    if(y >= top_height){
-	        num = 6;
-	    }else{
-	        num = 18;
-	    }
+    	for(var i = 1; i < fields.length; i++){
+    		if(x <= fields[i].x + width && x >= fields[i].x - width){
+    			if(y <= top_height && i >= 13){
+    				num = i;
+    			}else if(y > top_height && i <= 12){
+    				num = i;
+    			}
+    		}
+    	}
+    	
+    	if(x > fields[12].x){
+    		if(y >= top_height){
+    			num = 12;
+    		}else{
+    			num = 13;
+    		}
+    	}
+    	
+    	if(x < fields[1].x){
+    		if(y >= top_height){
+    			num = 1;
+    		}else{
+    			num = 24;
+    		}
+    	}
+    	
+    	if(x > fields[6].x && x < fields[7].x - 21){
+    	    if(y >= top_height){
+    	        num = 6;
+    	    }else{
+    	        num = 18;
+    	    }
+    	}
+    
+    // если игрок расположен изначально справа
+	}else{
+	    
+	    for(var i = 1; i < fields.length; i++){
+    		if(x <= fields[i].x + width && x >= fields[i].x - width){
+    			if(y <= top_height && i <= 13){
+    				num = i;
+    			}else if(y > top_height && i >= 12){
+    				num = i;
+    			}
+    		}
+    	}
+    	
+    	if(x < fields[12].x){
+    		if(y >= top_height){
+    			num = 13;
+    		}else{
+    			num = 12;
+    		}
+    	}
+    	
+    	if(x > fields[1].x){
+    		if(y >= top_height){
+    			num = 24;
+    		}else{
+    			num = 1;
+    		}
+    	}
+    	
+    	if(x < fields[6].x && x > fields[7].x - 21){
+    	    if(y >= top_height){
+    	        num = 18;
+    	    }else{
+    	        num = 6;
+    	    }
+    	}
+	    
 	}
 	
 	return num;
@@ -194,33 +263,66 @@ Board.prototype.init = function(){
     bimage.src = this.image;
 };
 
-Board.prototype.fields = [
-    0 	,	// Заглушка для нулевого элемента массива
-	// BOTTOM FIELDS
-	{x : 26  , pieces : [] }	,	// 1
-	{x : 71  , pieces : [] } 	,	// 2
-	{x : 114 , pieces : [] } 	,	// 3
-	{x : 157 , pieces : [] } 	,	// 4
-	{x : 200 , pieces : [] } 	,	// 5
-	{x : 243 , pieces : [] } 	,	// 6
-	{x : 325 , pieces : [] } 	,	// 7
-	{x : 368 , pieces : [] } 	,	// 8
-	{x : 413 , pieces : [] } 	,	// 9
-	{x : 456 , pieces : [] } 	,	// 10
-	{x : 499 , pieces : [] } 	,	// 11
-	{x : 542 , pieces : [] } 	,	// 12
-
-	// TOP FIELDS
-	{x : 544 , pieces : [] }	,	// 13
-	{x : 500 , pieces : [] } 	,	// 14
-	{x : 457 , pieces : [] } 	,	// 15
-	{x : 414 , pieces : [] } 	,	// 16
-	{x : 370 , pieces : [] } 	,	// 17
-	{x : 326 , pieces : [] } 	,	// 18
-	{x : 244 , pieces : [] } 	,	// 19
-	{x : 201 , pieces : [] } 	,	// 20
-	{x : 156 , pieces : [] } 	,	// 21
-	{x : 115 , pieces : [] } 	,	// 22
-	{x : 68  , pieces : [] } 	,	// 23
-	{x : 26  , pieces : [] } 		// 24
-];
+if(Board.prototype.startside === 'left'){
+    Board.prototype.fields = [
+        0 	,	// Заглушка для нулевого элемента массива
+        // BOTTOM FIELDS
+    	{x : 26  , pieces : [] }	,	// 1
+    	{x : 71  , pieces : [] } 	,	// 2
+    	{x : 114 , pieces : [] } 	,	// 3
+    	{x : 157 , pieces : [] } 	,	// 4
+    	{x : 200 , pieces : [] } 	,	// 5
+    	{x : 243 , pieces : [] } 	,	// 6
+    	{x : 325 , pieces : [] } 	,	// 7
+    	{x : 368 , pieces : [] } 	,	// 8
+    	{x : 413 , pieces : [] } 	,	// 9
+    	{x : 456 , pieces : [] } 	,	// 10
+    	{x : 499 , pieces : [] } 	,	// 11
+    	{x : 542 , pieces : [] } 	,	// 12
+        
+        // TOP FIELDS
+    	{x : 544 , pieces : [] }	,	// 13
+    	{x : 500 , pieces : [] } 	,	// 14
+    	{x : 457 , pieces : [] } 	,	// 15
+    	{x : 414 , pieces : [] } 	,	// 16
+    	{x : 370 , pieces : [] } 	,	// 17
+    	{x : 326 , pieces : [] } 	,	// 18
+    	{x : 244 , pieces : [] } 	,	// 19
+    	{x : 201 , pieces : [] } 	,	// 20
+    	{x : 156 , pieces : [] } 	,	// 21
+    	{x : 115 , pieces : [] } 	,	// 22
+    	{x : 68  , pieces : [] } 	,	// 23
+    	{x : 26  , pieces : [] } 		// 24
+    ];    
+}else{
+    Board.prototype.fields = [
+        0 	,	// Заглушка для нулевого элемента массива
+        // TOP FIELDS
+    	{x : 544 , pieces : [] }	,	// 13
+    	{x : 500 , pieces : [] } 	,	// 14
+    	{x : 457 , pieces : [] } 	,	// 15
+    	{x : 414 , pieces : [] } 	,	// 16
+    	{x : 370 , pieces : [] } 	,	// 17
+    	{x : 326 , pieces : [] } 	,	// 18
+    	{x : 244 , pieces : [] } 	,	// 19
+    	{x : 201 , pieces : [] } 	,	// 20
+    	{x : 156 , pieces : [] } 	,	// 21
+    	{x : 115 , pieces : [] } 	,	// 22
+    	{x : 68  , pieces : [] } 	,	// 23
+    	{x : 26  , pieces : [] } 	,	// 24
+        
+    	// BOTTOM FIELDS
+    	{x : 26  , pieces : [] }	,	// 1
+    	{x : 71  , pieces : [] } 	,	// 2
+    	{x : 114 , pieces : [] } 	,	// 3
+    	{x : 157 , pieces : [] } 	,	// 4
+    	{x : 200 , pieces : [] } 	,	// 5
+    	{x : 243 , pieces : [] } 	,	// 6
+    	{x : 325 , pieces : [] } 	,	// 7
+    	{x : 368 , pieces : [] } 	,	// 8
+    	{x : 413 , pieces : [] } 	,	// 9
+    	{x : 456 , pieces : [] } 	,	// 10
+    	{x : 499 , pieces : [] } 	,	// 11
+    	{x : 542 , pieces : [] } 		// 12
+    ];
+}

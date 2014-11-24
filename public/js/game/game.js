@@ -686,8 +686,8 @@ Game.prototype.calcCan = function(){
     if(countcanmove === 0){
         return false;
     }else{
-        console.log('cans count: ' , countcanmove);
-        console.log('canfields: ' , canarray);
+        //console.log('cans count: ' , countcanmove);
+        //console.log('canfields: ' , canarray);
         return true;
     }
 };
@@ -773,7 +773,7 @@ Game.prototype.activatePieces = function(){
         // если игрок не отменил свой ход передаем ход
         setTimeout(function() {
                 if(self.lastStep(countcanmove)){
-                    // увеличиваем количество ходов
+                    // увеличив��ем количество ходов
                     self.countsteps++;
                     // очищаем счетчик взятия с головы
                     self.rules.takehead = [];
@@ -827,7 +827,7 @@ Game.prototype.havePieces = function(){
     }else{
         return {win : true , pieces : 0 , inhouse : 15};
     }
-}
+};
 
 Game.prototype.sendReInvite = function(){
     this.self.reinvite = true;
@@ -841,7 +841,7 @@ Game.prototype.sendReInvite = function(){
 };
 
 Game.prototype.getReInvite = function(){
-    console.log('Получен запрос приглашения переиграть');
+    //console.log('Получен запрос приглашения переиграть');
     if(this.self.reinvite){
         this.acceptReInvite();
     }else{
@@ -850,7 +850,7 @@ Game.prototype.getReInvite = function(){
 };
 
 Game.prototype.acceptReInvite = function(){
-    console.log('Отправляем подтверждение переиграть');
+    //console.log('Отправляем подтверждение переиграть');
     this.sendRequest('giveConfirmReInvate' , {});
 };
 
@@ -887,7 +887,7 @@ Game.prototype.actionDialog = function(type){
 	        
 	    // показывеам окно проигравшему игроку
         case 'lose' :
-            console.log('Открываем окно проигрыша')
+            //console.log('Открываем окно проигрыша');
             finish_dialog.dialog({
                 modal : false ,
                 buttons : {
@@ -926,7 +926,7 @@ Game.prototype.endGame = function(){
         // отправляем сопернику сообщение о конце игры
         this.sendRequest('sendLose' , {});
     }else{
-        console.log('Получена пометка о проигрыше');
+        //console.log('Получена пометка о проигрыше');
         this.actionDialog('lose');
     }
 };
@@ -1031,7 +1031,7 @@ Game.prototype.takeStep = function(data){
                     // перемещаем фишку
                     piece.moveTo(pos.x , pos.y);
                     
-                    console.log('DATA SEND!!!!' , data);
+                    //console.log('DATA SEND!!!!' , data);
                     
                     
                 
@@ -1046,7 +1046,7 @@ Game.prototype.takeStep = function(data){
             break;
         
         default:
-            console.error('Передан неизвестный тип передачи ходов')
+            console.error('Передан неизвестный тип передачи ходов');
     }
 };
 
@@ -1131,14 +1131,15 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         var movefield   =   self.rules.calcMove(
                                 oldfield ,
                                 nowfield[0] + 1 ,
-                                node.id()
+                                node.id() ,
+                                {clickboard : false , movemax : false}
                             );
                             
         // если фишку перетянули из дома
         // если фишку перетянули из дома
         if(oldfield === 1){
             if(self.rules.takehead.length === 2){
-                var tmplast = self.getLastPieces(1 , 1)
+                var tmplast = self.getLastPieces(1 , 1);
                 if(self.rules.takehead.indexOf(tmplast[0].id) !== -1){
                     self.rules.controllhead = true;
                 }else{
@@ -1152,7 +1153,7 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         // если фишку перещаем в дом
         if(self.rules.prehouse){
             if(movefield >= 1 && movefield <= 6){
-                console.log('TO HOUSE!!!!');
+                //console.log('TO HOUSE!!!!');
                 movefield = 1;
                 pieceobj.house = true;
             }
@@ -1214,7 +1215,7 @@ Game.prototype.setDraggablePieces = function(pieces){
     pieces = this.addHistoryPieces(pieces);
     
     // устанавливаем клики по доске
-    this.setClickBoard();
+    //this.setClickBoard();
     
     // перебираем фишки для активации
     for(var i = 0; i < pieces.length; i++){
@@ -1245,11 +1246,22 @@ Game.prototype.setDraggablePieces = function(pieces){
                         for(var m = 0; m < next[node.id()].length; m++){
                             next[node.id()][m].obj.x( node.x() );
                             if(field > 12){
-                                // если фишки перетягиваются наверху
-                                next[node.id()][m].obj.y( node.y() + self.board.pieceheight * (m + 1));
+                                if(self.board.startside === 'left'){
+                                    // если фишки перетягиваются наверху
+                                    next[node.id()][m].obj.y( node.y() + self.board.pieceheight * (m + 1));
+                                }else{
+                                    // фишки перетягиваются внизу
+                                    next[node.id()][m].obj.y( node.y() - self.board.pieceheight * (m + 1));
+                                }
+                                
                             }else{
-                                // фишки перетягиваются внизу
-                                next[node.id()][m].obj.y( node.y() - self.board.pieceheight * (m + 1));
+                                if(self.board.startside === 'left'){
+                                    // фишки перетягиваются внизу
+                                    next[node.id()][m].obj.y( node.y() - self.board.pieceheight * (m + 1));                                    
+                                }else{
+                                    // если фишки перетягиваются наверху
+                                    next[node.id()][m].obj.y( node.y() + self.board.pieceheight * (m + 1));
+                                }
                             }
                             
                         }
@@ -1320,12 +1332,25 @@ Game.prototype.calcNextPieces = function(id){
 Game.prototype.movePiece = function(x , y , oldfield , piece){
     var self  = this;
     var pos;
+    var dopdata = {clickboard : false};
+    
+    if(oldfield > 7 && oldfield <= 11){        
+	var modx = Math.abs(x - piece.oldpos.x);
+    var mody = Math.abs(y - piece.oldpos.y);
+
+    if(mody > modx){
+		console.log('Перемещаем вниз');
+        dopdata.movemax = true;
+	}
+
+		console.log('modx , mody: ' , modx , mody);
+    }
     
     // вычисляем поле на котором остановилась фишка
     var newfield    = this.board.calcField(x , y);
         
     // вычисляем поле, на которое может сходить фишка
-    var movefield   = this.rules.calcMove(oldfield , newfield , piece.id);
+    var movefield   = this.rules.calcMove(oldfield , newfield , piece.id , dopdata);
     
     if(this.endstep){
         movefield = oldfield;
@@ -1348,7 +1373,7 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     // если фишку перещаем в дом
     if(this.rules.prehouse){
         if(movefield >= 1 && movefield <= 6){
-            console.log('TO HOUSE!!!!');
+            //console.log('TO HOUSE!!!!');
             movefield = 1;
             piece.house = true;
         }
@@ -1411,11 +1436,11 @@ Game.prototype.outPiece = function(piece , enemy){
                 $('#outblack').append('<img src="images/pieces/black.png" />');
             }
             
-            console.log('enemy:' , enemy);
+            //console.log('enemy:' , enemy);
             
             if(!enemy){
                 this.inhouse++;
-                console.log('inhouse' , this.inhouse);
+                //console.log('inhouse' , this.inhouse);
             }
         }else{
             console.error('Dont finded piece!!!' , piece);
@@ -1475,7 +1500,7 @@ Game.prototype.giveStep = function(house){
         case 'every':
             // отрпавляем данные хода
             if(this.step.send.length !== 0){
-                console.info('send data' , this.step.send)
+                //console.info('send data' , this.step.send)
                 this.step.send[0].house = house;
                 //if(!this.endstep){
                     this.sendRequest('transferStep' , this.step.send);
@@ -1507,13 +1532,13 @@ Game.prototype.selectPiece = function(piece){
     
     if(this.selectedpiece === false){
         select(piece , this);
-        this.setClickBoard();
+        //this.setClickBoard();
         
     // если кликнули на ту же самую фишку - снимаем выделение
     }else if(this.selectedpiece.id() !== piece.id()){
         this.unselectPiece();
         select(piece , this);
-        this.setClickBoard();
+        //this.setClickBoard();
     }else{
         select(piece , this);
     }
@@ -1541,7 +1566,7 @@ Game.prototype.unselectPiece = function(){
 	    
 	    this.board.stage.batchDraw();
 	}else{
-	    console.log('Нет выделенных изображений');
+	    //console.log('Нет выделенных изображений');
 	}
 };
 
@@ -1570,7 +1595,7 @@ Game.prototype.setClickBoard = function(){
                                     selectedpos[0] ,
                                     newfield ,
                                     self.selectedpiece.id() ,
-                                    true
+                                    {clickboard : true}
                                 );
             
             
@@ -1597,7 +1622,7 @@ Game.prototype.setClickBoard = function(){
                 // если фишку перещаем в дом
                 if(self.rules.prehouse){
                     if(movefield >= 1 && movefield <= 6){
-                        console.log('TO HOUSE!!!!');
+                        //console.log('TO HOUSE!!!!');
                         movefield = 1;
                         piece.house = true;
                     }
@@ -1848,7 +1873,7 @@ Game.prototype.takeGameData = function(data){
     var self = this;
     
     if(this.gamefinish){
-        console.log('gamefinish true!' , this.gamefinish);
+        //console.log('gamefinish true!' , this.gamefinish);
         
         // на всякий случай очищаем данные об игре
         this.clearGame();
