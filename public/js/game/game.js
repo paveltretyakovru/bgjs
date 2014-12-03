@@ -3,6 +3,8 @@ var Game = function(objboard , objrules , objbones , objsocket){
     this.rules  = objrules;
     this.bones  = objbones;
     this.socket = objsocket;
+    
+    this.setUndoClick();
 };
 
 /* 
@@ -948,6 +950,9 @@ Game.prototype.finishSteps = function(){
         this.bones.lightControll(this.step.steps , true);
         this.bones.hideDop();
         
+        // чистим иссторию ходов
+        this.rules.history = [];
+        
         // указываем, что сейчас ходит соперник
         this.step.player = 'enemy';
         // меняем сторону хода
@@ -1096,6 +1101,75 @@ Game.prototype.checkPiecesPosition = function(){
     }
 };
 
+
+Game.prototype.setUndoClick = function(){
+    var count_steps , _this , element;
+    
+    _this = this;
+    element = $('#tbUndo');
+    
+    // кликаем на кнопку "ход назад"
+    element.on('click' , function(){
+        // количество ходов
+        count_steps = _this.rules.history.length;
+        
+        // существуют ли сделанные ходы
+        if(count_steps > 0){
+            var last_step , last_new_field , last_old_field , last_id_piece ,
+                last_piece , last_old_coords , movefield;
+            
+            // сохраняем последний шаг и распределяем его данные
+            last_step       = _this.rules.history[count_steps - 1];
+            last_new_field  = last_step.newfield;
+            last_old_field  = last_step.oldfield;
+            last_id_piece   = last_step.id;
+            last_piece      = _this.getPiece(last_id_piece);
+            
+            // если фишка найдена
+            if(last_piece){
+                last_old_coords = _this.board.calcLastFieldPos(last_old_field);
+                
+                console.log('Coordinates last position: ' , last_old_coords);
+                
+                last_piece.moveTo(last_old_coords.x , last_old_coords.y);
+                
+                // вычисляем поле, на которое может сходить фишка
+                // стоит костыль - 1 и 2 параметр ф-ии поменял местами
+                // чтобы программа думала что я передвинул фишку назад
+                movefield   =   _this.rules.calcMove(
+                    last_new_field ,
+                    last_old_field ,
+                    last_piece.obj.id() ,
+                    {clickboard : false , movemax : false}
+                );
+                
+                // удаляем идентификатор фишки из предыдущей позиции
+                var lastpos     = _this.calcPiecePos(last_id_piece);
+                _this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                
+                // если фишку перещаем в дом
+                if(_this.rules.prehouse){
+                    if(movefield >= 1 && movefield <= 6){
+                        //console.log('TO HOUSE!!!!');
+                        movefield = 1;
+                        last_piece.house = true;
+                    }
+                }
+                
+                // перемещаем идентификатор фишки
+                _this.moveIdPiece(movefield , last_id_piece);
+                
+                // удаляем созданное перемещение из истории и предыдущее
+                _this.rules.history.splice(_this.rules.history.length - 2 , 2);
+                
+                // после завершения хода блокируем фишки, для новых расчетов
+                _this.blockedPieces();
+                _this.endDrag(last_piece);
+                
+            }
+        }
+    });
+};
 
 /*
     # Отрабатываем клики на фишке

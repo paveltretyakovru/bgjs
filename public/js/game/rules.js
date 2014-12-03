@@ -2,6 +2,7 @@ var Rules = function(){};
 
 Rules.prototype.step    = {};
 Rules.prototype.fields  = [];
+Rules.prototype.history = [];
 
 Rules.prototype.game;
 Rules.prototype.board;
@@ -32,6 +33,15 @@ Rules.prototype.setObjects = function(objects){
 Rules.prototype.addSendStep = function(data){
     var pieceid     = data[0];
     var newfield    = data[1];
+    
+    // сохраняем историю перемещения фишки, для кнопки "ход назад"
+    if(data[2] !== undefined){
+        this.history.push({
+            id          : pieceid ,
+            oldfield    : data[2] ,
+            newfield    : newfield
+        });
+    }
     
     this.step.send.push(
             {
@@ -324,7 +334,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[max.n][2] = 0;
             this.step.steps[max.n][3] = 0;
             
-            this.addSendStep([pieceid , max.field]);
+            this.addSendStep([pieceid , max.field , oldfield]);
             
             /* если есть поля значение костей с таким же предыдущим полем, затираем их */
             if(too.length !== 0){
@@ -476,7 +486,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[0][2] = oldfield;    // сохраняем предыдущиее поле
             this.step.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
             
-            this.addSendStep([pieceid , can1]);
+            this.addSendStep([pieceid , can1 , oldfield]);
             
             //console.log('return here');
             
@@ -492,7 +502,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
                 this.step.steps[1][2] = oldfield;    // сохраняем предыдущее поле
                 this.step.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
                 
-                this.addSendStep([pieceid , can2]);
+                this.addSendStep([pieceid , can2 , oldfield]);
                 
                 //console.log('return here');
                 
@@ -505,7 +515,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[1][2] = oldfield;    // сохраняем предыдущее поле
             this.step.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
             
-            this.addSendStep([pieceid , can2]);
+            this.addSendStep([pieceid , can2 , oldfield]);
             
             //console.log('return here');
             
@@ -524,7 +534,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[0][3] = pieceid;
             this.step.steps[1][3] = pieceid;
             
-            this.addSendStep([pieceid , can3]);
+            this.addSendStep([pieceid , can3 , oldfield]);
             
             console.log('return here');
             
@@ -536,7 +546,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[1][2] = oldfield;
             this.step.steps[1][3] = pieceid;
             
-            this.addSendStep([pieceid , can4]);
+            this.addSendStep([pieceid , can4 , oldfield]);
             
             //console.log('return here');
             
@@ -557,7 +567,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[1][2] = oldfield; // сохраняем предыдущиее поле
             this.step.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
             
-            this.addSendStep([pieceid , can2]);
+            this.addSendStep([pieceid , can2 , oldfield]);
             
             this.piecetohouse = false;
             
@@ -571,10 +581,19 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[1][2] = oldfield; // сохраняем предыдущиее поле
             this.step.steps[1][3] = pieceid;     // сохраняем идентификатор фихи
             
-            this.addSendStep([pieceid , can2]);
+            this.addSendStep([pieceid , can2 , oldfield]);
             
             //console.log('return can2' , can2);
             return can2;
+        }
+        
+        // вычисление ближайшего поля, от места, где отпустили фишку
+        if(can1 && can2){
+            if(Math.abs(newfield - can1) < Math.abs(newfield - can2)){
+                can2 = false;
+            }else{
+                can1 = false;
+            }
         }
         
         
@@ -584,7 +603,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[0][2] = oldfield; // сохраняем предыдущиее поле
             this.step.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
             
-            this.addSendStep([pieceid , can1]);
+            this.addSendStep([pieceid , can1 , oldfield]);
             
             return can1
         };
@@ -603,7 +622,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
                 this.step.steps[0][3] = 0;
             }
             
-            this.addSendStep([pieceid , can2]);
+            this.addSendStep([pieceid , can2 , oldfield]);
             
             //console.log('return can2' , can2);
             return can2;
@@ -618,7 +637,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             this.step.steps[0][3] = pieceid;     // сохраняем идентификатор фихи
             this.step.steps[1][3] = pieceid;
             
-            this.addSendStep([pieceid , can3]);
+            this.addSendStep([pieceid , can3 , oldfield]);
             
             //console.log('return can3' , can3);
             return can3
@@ -682,7 +701,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
                         }
                     }
                     
-                    this.addSendStep([pieceid , this.checkFieldNum(newfield)]);
+                    this.addSendStep([pieceid , this.checkFieldNum(newfield) , oldfield]);
                     //console.log('return newfield' , newfield);
                     return newfield;
                 }
@@ -732,7 +751,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             // сохраняем идентификатор фихи
             this.step.steps[elemfree][3] = pieceid;
             
-            this.addSendStep([pieceid , can5]);
+            this.addSendStep([pieceid , can5 , oldfield]);
             //console.log('return can5' , can5);
             return can5;
         }else{
