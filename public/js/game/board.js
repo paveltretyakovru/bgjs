@@ -138,7 +138,7 @@ Board.prototype.checkCorrectFieldNum = function(fieldnum){
     # Вычисляет номер поля по координатам
     #
 */
-Board.prototype.calcField = function(x , y){
+Board.prototype.calcField = function(x , y , params){
     //console.log('CALC FIELD!!!');
     var fields 		= this.fields;
 	var width 		= this.pieceheight / 2 + 5;
@@ -220,6 +220,17 @@ Board.prototype.calcField = function(x , y){
     	}
 	    
 	}
+	
+	console.info('Calc field:' , params , num);
+
+    // проверяем перетягивают ли фишку на первое поле
+    if(params !== undefined){
+            if('oldfield' in params){
+                    if(num === 24 && params.oldfield < 7 && params.oldfield !== 0){
+                            return 1;
+                    }
+            }
+    }
 	
 	return num;
 };

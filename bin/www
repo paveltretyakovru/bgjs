@@ -14,7 +14,7 @@ app.set('port', process.env.PORT || 3000);
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });
-
+ 
 /*
     #                                   #
     # Работает с подключенными игроками #
@@ -173,6 +173,19 @@ io.on('connection' , function(socket){
             bones       : game.bones , 
             lotbones    : [ lotbones[0] , lotbones[1] ]
         });
+    });
+    
+    socket.on('test' , function(data){
+        debug('test function');
+        if('login' in data){
+            debug('INFO. Test function user.id' , user.login );
+            user.login = data.login;
+            
+            debug('INFO. User login - ' , user.login , data);
+            
+        }else{
+            debug('ERROR. Не передан параметр login' , data);
+        }
     });
     
     /*

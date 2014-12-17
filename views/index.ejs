@@ -4,15 +4,31 @@
 
 	<!-- <link rel="shortcut icon" type="image/x-icon" href="/?getFile=images/favicon.ico"/> -->
 	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico"/>
+	
+	<link rel="stylesheet" href="../css/jquery-ui.css">
 
 	<title>Длинные нарды</title>
 	<link rel="stylesheet" type="text/css" href="../css/style.css">
 	
+	<script type="text/javascript">
+		
+        var _sessionId = "259727338547f22b03e0b17.22513218";
+        var _userId = 5082026;
+        var _username = "Гость 4219154";
+        var _isGuest = true;
+        var _gameVariationId = 666;
+        var _isFreshUser = true;
+        var _isVk = false;
+    
+	</script>
+	
 </head>
-<body onmousedown='return false;'>
-	<div id='gamestatus'></div>
-	<div id='home1pl'>*</div>
-	<div id='home2pl'>*</div>
+<body> <!--  onmousedown='return false;' -->
+	<div id='paneltop'>
+		<div id='gamestatus'></div>
+		<div id='home1pl'>*</div>
+		<div id='home2pl'>*</div>
+	</div>
 <!--
 	<div class="dice d1"></div>
 	<div class="dice d2"></div>
@@ -29,6 +45,14 @@
 	</div>
 	
 <div id='gamedialog'></div>
+
+	<div id='welcome-div'>
+		<form id='welcome-form'>
+			<input type='text' name='login' placeholder='Как вас зовут?'>
+			<input type='submit' value='Отправить' />
+		</form>
+	</div>
+
 
 <div class="die" id="die1">
 		<div class="face" data-id="1">
@@ -175,20 +199,19 @@
 			</div>
 	</div>
 	
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+	<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/humanity/jquery-ui.css"> --> 
+	<!-- <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script> -->
+	<!-- <script type="text/javascript" src="../js/jquery.dice.js"></script> -->
+	
 	<!-- Подключение сторонних библиотек и плагинов -->
 	<script type="text/javascript" src="../js/kinetic.js"></script>
-	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
 	<script type="text/javascript" src="../js/jquery.min.js"></script>
-	<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/humanity/jquery-ui.css"> --> 
-	<link rel="stylesheet" href="../css/jquery-ui.css">
-  	<!-- <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script> -->
   	<script type="text/javascript" src="../js/jquery-ui.js"></script>
   	<script type="text/javascript" src="../js/socket.io.js"></script>
-  	
   	<script type="text/javascript" src="../js/ion.sound.min.js"></script>
-  	<!-- <script type="text/javascript" src="../js/jquery.dice.js"></script> -->
-  	
-  	<!-- вращение костей -->
+  	<script type="text/javascript" src="../js/underscore.js"></script>
+  	<script type="text/javascript" src="../js/backbone.js"></script>
   	<script type="text/javascript" src="../js/jquery.rotate.js"></script>
 
   	<!-- скрипты системы -->
@@ -198,7 +221,7 @@
   	<script type="text/javascript" src="../js/game/bones.js"></script>
   	<script type="text/javascript" src="../js/game/rules.js"></script>
   	<script type="text/javascript" src="../js/game/piece.js"></script>
-	<script type="text/javascript" src="../js/system.js"></script>
-	
+  	<script type="text/javascript" src="../js/auth.js"></script>
+	<script type="text/javascript" src="../js/main.js"></script>
 </body>
 </html>

@@ -1,14 +1,18 @@
-#container{
-    margin     : auto;
-    height: 600px;
-    width: 601px;
-}
+#container{margin : auto; height: 600px; width: 601px;}
+#gamestatus{color : red;}
 
-#gamestatus{
-    color : red;
-}
+#outbody{height: 50px; width: 600px; margin: auto; margin-top:25px; background: #fff}
+#outwhite , #outblack{width:100%; height:50%}
+#outwhite img , #outblack img{height: 25px;	float: left}
+
+.ui_button{font-weight: normal;	color: #555555;	background: #e6e6e6}
+.ui_button{border: 1px solid #999999; background: #dadada}
+/* #welcome-div{display: none;} */
 
 /* DIES STYLES */
+#die3 .pip , #die4 .pip{width: 5px; height: 5px;}
+#die3 {width: 40px; height: 40px; top:400px;}
+#die4 {width: 40px; height: 40px; top:400px;}
 
 div.die{
 	width:50px;
@@ -30,9 +34,6 @@ div.die{
 	opacity:0.5;
 	visibility: hidden;
 }
-
-#die3 {width: 40px; height: 40px; top:400px;}
-#die4 {width: 40px; height: 40px; top:400px;}
 
 	div.die.active{-webkit-opacity:1;-moz-opacity:1;opacity:1;}
 	div.die#die1{left:50%;}
@@ -61,45 +62,4 @@ div.die{
 	div.die div.face div.pip.middle{top:20px;}
 	div.die div.face div.pip.bottom{bottom:7.5px;}
 	
-	#die3 .pip , #die4 .pip{width: 5px; height: 5px;}
-
-
-#outbody{
-    height: 50px;
-    width: 600px;
-    margin: auto;
-    background: #fff;
-  }
-
-#outwhite , #outblack{
-  width:100%;
-  height:50%;
-}
-
-#outwhite img , #outblack img{
-	height: 25px;
-	float: left;
-}
-
-
-/* .dice {
-    float: left;
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    box-shadow: 0 0 10px rgba(125,90,57,0.5);
-    background: #fff url('../images/dice.png');
-    z-index: 999;
-    visibility: hidden;
-}
-    .d1{}
-    .d2{}*/
-    
-
-.ui_button{
-	font-weight: normal;
-	color: #555555;
-	background: #e6e6e6;
-}
-
-.ui_button{border: 1px solid #999999; background: #dadada}
+	#paneltop div{float:left; margin-left: 10px;}

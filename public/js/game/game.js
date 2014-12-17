@@ -18,7 +18,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -1247,6 +1247,13 @@ Game.prototype.setClicksPiece = function(node , oldfield){
         // перемещаем идентификатор фишки
         self.moveIdPiece(movefield , node.id());
         
+        // сохраняем поле на котором оказалась фишка
+        pieceobj.field = movefield;
+        
+        if(pieceobj.house){
+            self.outPiece(pieceobj , false);
+        }
+        
         // завершающие действия хода
         self.endDrag(pieceobj);
     });
@@ -1421,7 +1428,8 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     }
     
     // вычисляем поле на котором остановилась фишка
-    var newfield    = this.board.calcField(x , y);
+    var newfield    = this.board.calcField(x , y , {oldfield : oldfield});
+    console.log('movePiece. oldfield:' , oldfield , '; newfield:' , newfield);
         
     // вычисляем поле, на которое может сходить фишка
     var movefield   = this.rules.calcMove(oldfield , newfield , piece.id , dopdata);
@@ -1974,7 +1982,7 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
                 //this.step.bones = [1 , 2];  // restep test
-                //this.step.bones = [3 , 3];
+                //this.step.bones = [6 , 6];
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
