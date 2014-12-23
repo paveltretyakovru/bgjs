@@ -41,6 +41,7 @@ Game.prototype.gamefinish   = false;
 Game.prototype.imageObjects = {};
 Game.prototype.light        = {};
 Game.prototype.timer        = {};
+Game.prototype.outPieces    = [];   // выведенные фишки
 
 Game.prototype.self         = {
     reinvite    : false
@@ -1116,7 +1117,9 @@ Game.prototype.setUndoClick = function(){
         // существуют ли сделанные ходы
         if(count_steps > 0){
             var last_step , last_new_field , last_old_field , last_id_piece ,
-                last_piece , last_old_coords , movefield;
+                last_piece , last_old_coords , movefield , out_piece;
+                
+            out_piece = null;
             
             // сохраняем последний шаг и распределяем его данные
             last_step       = _this.rules.history[count_steps - 1];
@@ -1125,32 +1128,78 @@ Game.prototype.setUndoClick = function(){
             last_id_piece   = last_step.id;
             last_piece      = _this.getPiece(last_id_piece);
             
+            if(!last_piece){
+                out_piece = _this.findOutPiece({id : last_id_piece});
+                if(out_piece.finded){
+                    if('object' in out_piece){
+                        last_piece = out_piece.object.object;
+                        // так как выведенная фишка спрятана - показываем её
+                        console.log('last_piece: ' , last_piece);
+                        
+                        last_piece.obj.show();
+                        _this.board.stage.batchDraw();
+                        
+                        _this.pieces.push(last_piece);
+                        
+                        // указываем, что фишка будет не в доме
+                        var test = _this.pieces[_this.pieces.length-1];
+
+                        console.log("test.house , last_piece.house" , test.house , last_piece.house);
+                        
+                        test.house       = false;
+                        last_piece.house = false;
+                        
+                        console.log("test.house , last_piece.house" , test.house , last_piece.house);
+                    }
+                }
+            }
+            
             // если фишка найдена
             if(last_piece){
                 last_old_coords = _this.board.calcLastFieldPos(last_old_field);
                 
-                console.log('Coordinates last position: ' , last_old_coords);
+                //console.log('Coordinates last position: ' , last_old_coords);
                 
                 last_piece.moveTo(last_old_coords.x , last_old_coords.y);
                 
-                // вычисляем поле, на которое может сходить фишка
-                // стоит костыль - 1 и 2 параметр ф-ии поменял местами
-                // чтобы программа думала что я передвинул фишку назад
-                movefield   =   _this.rules.calcMove(
-                    last_new_field ,
-                    last_old_field ,
-                    last_piece.obj.id() ,
-                    {clickboard : false , movemax : false}
-                );
-                
-                // удаляем идентификатор фишки из предыдущей позиции
-                var lastpos     = _this.calcPiecePos(last_id_piece);
-                _this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                if(out_piece === null){
+                    // удаляем идентификатор фишки из предыдущей позиции
+                    var lastpos     = _this.calcPiecePos(last_id_piece);
+                    _this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                    
+                    // вычисляем поле, на которое может сходить фишка
+                    // стоит костыль - 1 и 2 параметр ф-ии поменял местами
+                    // чтобы программа думала что я передвинул фишку назад
+                    movefield   =   _this.rules.calcMove(
+                        last_new_field ,
+                        last_old_field ,
+                        last_piece.obj.id() ,
+                        {clickboard : false , movemax : false}
+                    );
+                }else{
+                    
+                    /*
+                        Добавил в фукнцию calcMove() новый параметр: moveconvert
+                        Этот параметр в функции снова меняет местами oldfield
+                        и newfield, т.к. в самом начале мы поменяли их местами,
+                        чтобы функция подумала, что мы делаем шаг назад,
+                        затем меняем, чтобы он нашел предыдущий шаг в истории шагов.
+                        Заранее прошу прощение за весь этот говнокод - он неизбежен
+                        из-за вечной смены ТЗ.
+                    */
+                    
+                    movefield   =   _this.rules.calcMove(
+                        last_old_field ,
+                        last_new_field ,                        
+                        last_piece.obj.id() ,
+                        {clickboard : false , movemax : false , moveconvert : true}
+                    );
+                }
                 
                 // если фишку перещаем в дом
                 if(_this.rules.prehouse){
                     if(movefield >= 1 && movefield <= 6){
-                        //console.log('TO HOUSE!!!!');
+                        console.log('TO HOUSE!!!!');
                         movefield = 1;
                         last_piece.house = true;
                     }
@@ -1166,9 +1215,38 @@ Game.prototype.setUndoClick = function(){
                 _this.blockedPieces();
                 _this.endDrag(last_piece);
                 
+            }else{
+                // Если фишка не найдена, значит её вывели
+                //console.info("Фишка не найдена, ищем её в выведеных");
+                
+                
             }
         }
     });
+};
+
+/*
+ Функция ищет фишку в выведенных фишках
+*/
+Game.prototype.findOutPiece = function(data){
+    if('id' in data){
+        for (var i = 0; i < this.outPieces.length; i++) {
+            if(this.outPieces[i].id === data.id){
+                return {
+                    finded : true ,
+                    object : this.outPieces[i]
+                };
+            }
+        }
+        
+        return {
+            finded : false
+        };
+    }
+    
+    return {
+        finded : false
+    };
 };
 
 /*
@@ -1503,6 +1581,13 @@ Game.prototype.outPiece = function(piece , enemy){
             }
         }
         if(pos !== false){
+            /* Сохраняем  объект выводимой фишки */
+            this.outPieces.push({
+                id : pid ,
+                color : piece.color ,
+                object : this.pieces[pos]
+            });
+            
             this.pieces.splice(pos , 1);
             
             var field = (enemy) ? 13 : 1;
@@ -1524,6 +1609,7 @@ Game.prototype.outPiece = function(piece , enemy){
                 this.inhouse++;
                 //console.log('inhouse' , this.inhouse);
             }
+            
         }else{
             console.error('Dont finded piece!!!' , piece);
         }

@@ -90,8 +90,11 @@ Piece.prototype.moveTo = function( x , y){
 		x : x ,
 		y : y ,
 		onFinish : function(){
+		    console.log('onFINISH' ,  self.house);
 		    if(self.house){
-		        self.obj.destroy();
+		        //self.obj.destroy();
+		        console.info('TEEEEEEEEEEEST');
+		        self.obj.hide();
                 self.stage.batchDraw();
 		    }
 		}

@@ -303,6 +303,17 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
     if(newfield < oldfield){
         var max = false;
         var too = [];
+        
+        // Костыль для возвращения фишки из дома -_- ,
+        // естественно с подачи шефа... -_- -_- -_- -_- -_- -_-
+        if('moveconvert' in configs){
+            if(configs.moveconvert){
+                var tmp = oldfield;
+                oldfield = newfield;
+                newfield = tmp;
+            }
+        }
+        
         for(var i = 0; i < this.step.steps.length; i++){
             // ищем в истории поле с которого передвинута фишка
             if(this.step.steps[i][1] === oldfield){
