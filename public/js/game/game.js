@@ -1005,14 +1005,49 @@ Game.prototype.takeStep = function(data){
                 // ищмем фишку
                 var piece = this.getPiece(data.pieceid);
                 
+                var out_piece;
+                
+                if(!piece){
+                    out_piece = this.findOutPiece({id : data.pieceid});
+                    if(out_piece.finded){
+                        if('object' in out_piece){
+                            piece = out_piece.object.object;
+
+                            piece.obj.show();
+                            this.board.stage.batchDraw();
+
+                            this.pieces.push(piece);
+
+                            // указываем, что фишка будет не в доме
+                            var test = this.pieces[this.pieces.length-1];
+
+                            console.log("test.house , piece.house" , test.house , piece.house);
+
+                            test.house       = false;
+                            piece.house = false;
+
+                            console.log("test.house , piece.house" , test.house , piece.house);
+                        }
+                    }
+                }
+                
                 // вычисляем предыдущее положение фишки
                 var lastpos     = this.calcPiecePos(piece.id);
                 
                 /* если поля совпадают не перемещаем фишку */
                 if(lastpos[0] !== data.newfield){
                 
-                    // удаляем идентификатор фишки из предыдущей позиции
-                    this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                    // если фишку ведут не из дома...
+                    if(out_piece === undefined){
+                        // удаляем идентификатор фишки из предыдущей позиции
+                        this.board.fields[lastpos[0]].pieces.splice(lastpos[1] , 1);
+                    }else{
+                        if(piece.color === 'white'){
+                            $('#outwhite').find('img:last').remove();
+                        }else{
+                            $('#outblack').find('img:last').remove();
+                        }
+                    }
                     
                     var field = this.transformEnemyStep(data.newfield);
                     
@@ -1194,6 +1229,13 @@ Game.prototype.setUndoClick = function(){
                         last_piece.obj.id() ,
                         {clickboard : false , movemax : false , moveconvert : true}
                     );
+                    
+                    if(last_piece.color === 'white'){
+                        $('#outwhite').find('img:last').remove();
+                    }else{
+                        $('#outblack').find('img:last').remove();
+                    }
+                    
                 }
                 
                 // если фишку перещаем в дом
