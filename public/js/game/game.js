@@ -609,8 +609,8 @@ Game.prototype.letsRock = function(){
     
     // Выводим сообщение
     if(player === 'enemy'){
-        this.setMessage('Ход противника');
-    }else{this.setMessage('Ваш ход');}
+        this.setMessage('<span style="color:red">Ход противника</span>');
+    }else{this.setMessage('<span style="color:green">Ваш ход</span>');}
     
     if(player === 'self'){
         // Считаем количество ходов
@@ -1862,7 +1862,7 @@ Game.prototype.setClickBoard = function(){
             }else{
                 self.setMessage("Невозможно сходить на данное поле");
                 setTimeout(function() {
-                    self.setMessage("Ваш ход");
+                    self.setMessage('<span style="color:green">Ваш ход</span>');
                 }, self.ruletimemes);
             }
         }
@@ -2206,9 +2206,9 @@ Game.prototype.animateLot = function(lots){
         self.bones.shake(1 , shaketime , lots[1]);
         // Отображаем чей ход
         if(self.step.player === 'enemy'){
-            self.setMessage('Жеребьевка окончена. Ход противника');
+            self.setMessage('<span style="color:red">Жеребьевка окончена. Ход противника</span>');
         }else{
-            self.setMessage('Жеребьевка окончена. Ваш ход');
+            self.setMessage('<span style="color:green">Жеребьевка окончена. Ваш ход</span>');
         }
     }, shaketime);
 };
