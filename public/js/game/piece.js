@@ -90,10 +90,13 @@ Piece.prototype.moveTo = function( x , y){
 		x : x ,
 		y : y ,
 		onFinish : function(){
-		    console.log('onFINISH' ,  self.house);
 		    if(self.house){
 		        //self.obj.destroy();
-		        console.info('TEEEEEEEEEEEST');
+		        
+		        /*
+		            Теперь фишку не уничтожаем, а скрываем, если вдруг шеф
+		            захочет вывести снова её из дома в конце игры
+		        */
 		        self.obj.hide();
                 self.stage.batchDraw();
 		    }

@@ -221,7 +221,7 @@ Board.prototype.calcField = function(x , y , params){
 	    
 	}
 	
-	console.info('Calc field:' , params , num);
+	//console.info('Calc field:' , params , num);
 
     // проверяем перетягивают ли фишку на первое поле
     if(params !== undefined){

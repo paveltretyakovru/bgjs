@@ -263,7 +263,7 @@ Rules.prototype.handleRules = function(oldfield , newfield , boneval){
             // если фишка идет в дом не выполнив условия перевода всех фишек
             // в последнее поле
             if(newfield >= 1 && newfield <= 6 && oldfield >= 19){
-                console.error('Следующий ход в дом. Пока нельзя' , oldfield);
+                //console.error('Следующий ход в дом. Пока нельзя' , oldfield);
                 return false;
             }else{
                 if(this.blockRule(oldfield , newfield)){
@@ -441,7 +441,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
                 }
             }else{
                 /*
-                    # Либо делаем ход на вторую кость классически :-)
+                    # Либо дела��м ход на вторую кость классически :-)
                 */
                 
                 boneval = this.step.steps[1][0];
@@ -472,7 +472,7 @@ Rules.prototype.calcMove = function(oldfield , newfield , pieceid , configs){
             }
         }
         
-        // условие, что игрок после первого хода хочет сходить на сумму очков
+        // условие, что игрок после первого хода хочет сходить на сумму ��чков
         if(
             this.step.steps[0][1] !== 0 &&
             this.step.steps[1][1] === 0 &&

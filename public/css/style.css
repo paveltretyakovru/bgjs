@@ -29,9 +29,9 @@ div.die{
 	position:absolute;
 	top:420px;
 	cursor:pointer;
-	-webkit-opacity:0.5;
-	-moz-opacity:0.5;
-	opacity:0.5;
+	-webkit-opacity:1;
+	-moz-opacity:1;
+	opacity:1;
 	visibility: hidden;
 }
 

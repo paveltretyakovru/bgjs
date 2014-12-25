@@ -18,7 +18,7 @@ Game.prototype.socket   = {};
 // ### конец управляющих объектов системы
 
 Game.prototype.meselement   = '#gamestatus';
-Game.prototype.type         = 'prehouse';   // тип игры | long || prehouse // blocktest // restep
+Game.prototype.type         = 'long';   // тип игры | long || prehouse // blocktest // restep
 Game.prototype.onepos       = true;     // фишки распалагаются всега в одной позиции
 Game.prototype.pieces       = [ /* */];
 Game.prototype.side         = '';       // left || right
@@ -689,8 +689,6 @@ Game.prototype.calcCan = function(){
     if(countcanmove === 0){
         return false;
     }else{
-        //console.log('cans count: ' , countcanmove);
-        //console.log('canfields: ' , canarray);
         return true;
     }
 };
@@ -1021,12 +1019,8 @@ Game.prototype.takeStep = function(data){
                             // указываем, что фишка будет не в доме
                             var test = this.pieces[this.pieces.length-1];
 
-                            console.log("test.house , piece.house" , test.house , piece.house);
-
                             test.house       = false;
                             piece.house = false;
-
-                            console.log("test.house , piece.house" , test.house , piece.house);
                         }
                     }
                 }
@@ -1169,7 +1163,7 @@ Game.prototype.setUndoClick = function(){
                     if('object' in out_piece){
                         last_piece = out_piece.object.object;
                         // так как выведенная фишка спрятана - показываем её
-                        console.log('last_piece: ' , last_piece);
+                        //console.log('last_piece: ' , last_piece);
                         
                         last_piece.obj.show();
                         _this.board.stage.batchDraw();
@@ -1179,12 +1173,12 @@ Game.prototype.setUndoClick = function(){
                         // указываем, что фишка будет не в доме
                         var test = _this.pieces[_this.pieces.length-1];
 
-                        console.log("test.house , last_piece.house" , test.house , last_piece.house);
+                        //console.log("test.house , last_piece.house" , test.house , last_piece.house);
                         
                         test.house       = false;
                         last_piece.house = false;
                         
-                        console.log("test.house , last_piece.house" , test.house , last_piece.house);
+                        //console.log("test.house , last_piece.house" , test.house , last_piece.house);
                     }
                 }
             }
@@ -1241,7 +1235,7 @@ Game.prototype.setUndoClick = function(){
                 // если фишку перещаем в дом
                 if(_this.rules.prehouse){
                     if(movefield >= 1 && movefield <= 6){
-                        console.log('TO HOUSE!!!!');
+                        //console.log('TO HOUSE!!!!');
                         movefield = 1;
                         last_piece.house = true;
                     }
@@ -1520,14 +1514,19 @@ Game.prototype.setDraggable = function(piece , oldfield){
 
 Game.prototype.calcNextPieces = function(id){
     var pos     = this.calcPiecePos(id);
-    var pieces  = this.board.fields[pos[0]].pieces;
-    var next    = [];
     
-    for(var i = pos[1]; i < pieces.length; i++){
-        next.push(this.getPiece(pieces[i]));
+    if(pos){
+        var pieces  = this.board.fields[pos[0]].pieces;
+        var next    = [];
+        
+        for(var i = pos[1]; i < pieces.length; i++){
+            next.push(this.getPiece(pieces[i]));
+        }
+        
+        return next;
+    }else{
+        console.error('Не найдена фишка с идентификатором' , id);
     }
-    
-    return next;
 };
 
 Game.prototype.movePiece = function(x , y , oldfield , piece){
@@ -1540,16 +1539,16 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
     var mody = Math.abs(y - piece.oldpos.y);
 
     if(mody > modx){
-		console.log('Перемещаем вниз');
+		//console.log('Перемещаем вниз');
         dopdata.movemax = true;
 	}
 
-		console.log('modx , mody: ' , modx , mody);
+		//console.log('modx , mody: ' , modx , mody);
     }
     
     // вычисляем поле на котором остановилась фишка
     var newfield    = this.board.calcField(x , y , {oldfield : oldfield});
-    console.log('movePiece. oldfield:' , oldfield , '; newfield:' , newfield);
+    //console.log('movePiece. oldfield:' , oldfield , '; newfield:' , newfield);
         
     // вычисляем поле, на которое может сходить фишка
     var movefield   = this.rules.calcMove(oldfield , newfield , piece.id , dopdata);
@@ -1614,7 +1613,9 @@ Game.prototype.movePiece = function(x , y , oldfield , piece){
 };
 
 Game.prototype.outPiece = function(piece , enemy){
-    console.error('OUT PIECE!');
+    
+    console.info('Выводится фишка с id' , piece.id);
+    
     var pid = piece.id;
         var pos = false;
         for(var i = 0; i < this.pieces.length; i++){
@@ -2110,7 +2111,8 @@ Game.prototype.takeGameData = function(data){
                 //this.step.bones = [2 , 3];
                 //this.step.bones = [1 , 5]; // block test
                 //this.step.bones = [1 , 2];  // restep test
-                //this.step.bones = [6 , 6];
+                //this.step.bones = [3 , 4];
+                
                 
                 // Анимируем жеребьевку
                 this.animateLot(data.lotbones);
